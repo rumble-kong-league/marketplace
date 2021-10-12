@@ -180,7 +180,6 @@ contract Marketplace is IMarketplace {
 }
 
 /*
- *
  * 88888888ba  88      a8P  88
  * 88      "8b 88    ,88'   88
  * 88      ,8P 88  ,88"     88
