@@ -1,26 +1,38 @@
 //SPDX-License-Identifier: MIT
 pragma solidity =0.8.9;
 
-import "../interfaces/IMarketplace.sol";
-import "../interfaces/NFTContract.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 
-// todo: emit events
-// todo: support for any NFT
+import "../interfaces/IMarketplace.sol";
+import "../interfaces/INFTContract.sol";
+import "./NFTCommon.sol";
+
 // todo: batch operations
 // todo: transfers will not work like in here
 // todo: think about how on transfer we can delete the ask of prev owner
 // might not be necessary if we bake in checks, and if checks fail: delete
-// todo: make an interface for this contract and move structs events into there
 // todo: check out 0.8.9 custom types
 contract Marketplace is IMarketplace {
+    using Address for address payable;
+    using NFTCommon for INFTContract;
+
     mapping(address => mapping(uint256 => Ask)) public asks;
     mapping(address => mapping(uint256 => Bid)) public bids;
     mapping(address => uint256) public escrow;
 
+    // to avoid extra gas that comes with storing signatures on-chain, they have to be stored in a db
+    // this means that we require redundancy and replication across our cloud servers. Different zones
+    // would be ideal
+    // 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9
+    bytes32 public immutable ASK_TYPEHASH =
+        keccak256(
+            "Ask(address nft,uint256 tokenID,uint256 price,address to,uint256 nonce,uint256 deadline)"
+        );
+
     // ======= CREATE ASK OR BID =====================================
 
     function ask(
-        NFTContract nft,
+        INFTContract nft,
         uint256 tokenID,
         uint256 price,
         address to
@@ -51,7 +63,7 @@ contract Marketplace is IMarketplace {
         });
     }
 
-    function bid(NFTContract nft, uint256 tokenID) external payable override {
+    function bid(INFTContract nft, uint256 tokenID) external payable override {
         address nftAddress = address(nft);
         // no point in bidding on burned or non-existent NFT token ID
         require(nft.ownerOf(tokenID) != address(0), "");
@@ -79,7 +91,7 @@ contract Marketplace is IMarketplace {
 
     // ======= CANCEL ASK OR BID =====================================
 
-    function cancelAsk(NFTContract nft, uint256 tokenID) external override {
+    function cancelAsk(INFTContract nft, uint256 tokenID) external override {
         // to cancel the ask, you must be an owner of the NFT token ID
         require(nft.ownerOf(tokenID) == msg.sender, "");
 
@@ -88,7 +100,7 @@ contract Marketplace is IMarketplace {
         emit AskDeleted({nft: address(nft), tokenID: tokenID});
     }
 
-    function cancelBid(NFTContract nft, uint256 tokenID) external override {
+    function cancelBid(INFTContract nft, uint256 tokenID) external override {
         address nftAddress = address(nft);
         require(bids[nftAddress][tokenID].buyer == msg.sender, "");
 
@@ -108,7 +120,7 @@ contract Marketplace is IMarketplace {
      * there is no bid that requires escrow adjusting. See acceptBid's function
      * body comments for details.
      */
-    function acceptAsk(NFTContract nft, uint256 tokenID)
+    function acceptAsk(INFTContract nft, uint256 tokenID)
         external
         payable
         override
@@ -150,13 +162,17 @@ contract Marketplace is IMarketplace {
         delete asks[nftAddress][tokenID];
     }
 
-    function acceptBid(NFTContract nft, uint256 tokenID) external override {
+    function acceptBid(INFTContract nft, uint256 tokenID) external override {
         address nftAddress = address(nft);
         // owner of the NFT is allowed to accept a bid on that NFT token ID
         require(nft.ownerOf(tokenID) == msg.sender, "");
 
-        // send NFT from accepter, receive money from bidder
-        // todo: _transfer(msg.sender, bids[tokenID].buyer, tokenID);
+        nft.safuTransferFrom(
+            msg.sender,
+            bids[nftAddress][tokenID].buyer,
+            tokenID,
+            new bytes(0)
+        );
         escrow[msg.sender] += bids[nftAddress][tokenID].price;
 
         emit BidAccepted({
@@ -172,8 +188,7 @@ contract Marketplace is IMarketplace {
     function withdraw() external override {
         uint256 amount = escrow[msg.sender];
         escrow[msg.sender] = 0;
-        // todo: bool success, require success
-        payable(address(msg.sender)).transfer(amount);
+        payable(address(msg.sender)).sendValue(amount);
     }
 
     // ==============================================================

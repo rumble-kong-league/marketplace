@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity =0.8.9;
 
-import "./NFTContract.sol";
+import "./INFTContract.sol";
 
 interface IMarketplace {
     // ======================= EVENTS ================================
@@ -50,19 +50,19 @@ interface IMarketplace {
     // ===============================================================
 
     function ask(
-        NFTContract nft,
+        INFTContract nft,
         uint256 tokenID,
         uint256 price,
         address to
     ) external;
 
-    function bid(NFTContract nft, uint256 tokenID) external payable;
+    function bid(INFTContract nft, uint256 tokenID) external payable;
 
     // ======= CANCEL ASK OR BID =====================================
 
-    function cancelAsk(NFTContract nft, uint256 tokenID) external;
+    function cancelAsk(INFTContract nft, uint256 tokenID) external;
 
-    function cancelBid(NFTContract nft, uint256 tokenID) external;
+    function cancelBid(INFTContract nft, uint256 tokenID) external;
 
     /**
      * @dev Seller placed ask, you are fine with the terms. You accept their
@@ -71,9 +71,9 @@ interface IMarketplace {
      * there is no bid that requires escrow adjusting. See acceptBid's function
      * body comments for details.
      */
-    function acceptAsk(NFTContract nft, uint256 tokenID) external payable;
+    function acceptAsk(INFTContract nft, uint256 tokenID) external payable;
 
-    function acceptBid(NFTContract nft, uint256 tokenID) external;
+    function acceptBid(INFTContract nft, uint256 tokenID) external;
 
     /**
      * @dev Sellers will be able to withdraw their payment by calling this function.

@@ -1,15 +1,18 @@
-//SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 pragma solidity =0.8.9;
 
-interface NFTContract {
-    /**
-     * @dev Returns the owner of the `tokenId` token.
-     *
-     * Requirements:
-     *
-     * - `tokenId` must exist.
-     */
-    function ownerOf(uint256 tokenId) external view returns (address owner);
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract E721 is Ownable, ERC721Enumerable {
+    uint256 private counter = 0;
+
+    constructor() ERC721("E721", "E721") {}
+
+    function faucet() public {
+        counter++;
+        _mint(msg.sender, counter);
+    }
 }
 
 /*
@@ -22,12 +25,12 @@ interface NFTContract {
  * 88     `8b  88     "88,  88
  * 88      `8b 88       Y8b 88888888888
  *
- * Marketplace: interfaces/NFTContract.sol
+ * Marketplace: Marketplace.sol
  *
  * MIT License
  * ===========
  *
- * Copyright (c) 2022 Rumble League Studios Inc.
+ * Copyright (c) 2022 Marketplace
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
