@@ -48,6 +48,7 @@ contract Marketplace is IMarketplace {
         "Marketplace::ask price higher than sent value";
     string private constant REVERT_ASK_SELLER_NOT_OWNER =
         "Marketplace::ask creator not owner";
+    string private constant REVERT_NFT_NOT_SENT = "Marketplace::NFT not sent";
 
     // ======= CREATE ASK OR BID =====================================
 
@@ -66,7 +67,7 @@ contract Marketplace is IMarketplace {
         address to
     ) external override {
         require(
-            nft.ownerOf(tokenID) == msg.sender,
+            nft.quantityOf(msg.sender, tokenID) > 0,
             REVERT_NOT_OWNER_OF_TOKEN_ID
         );
 
@@ -99,15 +100,19 @@ contract Marketplace is IMarketplace {
 
     function bid(INFTContract nft, uint256 tokenID) external payable override {
         address nftAddress = address(nft);
-        require(nft.ownerOf(tokenID) != msg.sender, REVERT_OWNER_OF_TOKEN_ID);
-        // require that bid value larger than the existing bid (if exists) or 0 (if doesn't)
+        // ! this will disallow bidding on 1155s that you already hold. Is this desired?
+        // ! can this be ignored and agents be allowed to bid on what they have?
+        require(
+            nft.quantityOf(msg.sender, tokenID) == 0,
+            REVERT_OWNER_OF_TOKEN_ID
+        );
+        // require bid larger than existing bid or 0 (if exists or doesn't)
         require(
             msg.value > bids[nftAddress][tokenID].price,
             REVERT_BID_TOO_LOW
         );
 
-        // if there is an existing bid, then its bid price is lower
-        // therefore, let the creator of that bid withdraw their bid
+        // if bid existed, let the prev. creator withdraw their bid. new overwrites
         if (bids[nftAddress][tokenID].exists) {
             escrow[bids[nftAddress][tokenID].buyer] += bids[nftAddress][tokenID]
                 .price;
@@ -127,7 +132,7 @@ contract Marketplace is IMarketplace {
 
     function cancelAsk(INFTContract nft, uint256 tokenID) external override {
         require(
-            nft.ownerOf(tokenID) == msg.sender,
+            nft.quantityOf(msg.sender, tokenID) > 0,
             REVERT_NOT_OWNER_OF_TOKEN_ID
         );
 
@@ -182,7 +187,7 @@ contract Marketplace is IMarketplace {
             REVERT_ASK_INSUFFICIENT_VALUE
         );
         require(
-            nft.ownerOf(tokenID) == asks[nftAddress][tokenID].seller,
+            nft.quantityOf(asks[nftAddress][tokenID].seller, tokenID) > 0,
             REVERT_ASK_SELLER_NOT_OWNER
         );
 
@@ -211,16 +216,17 @@ contract Marketplace is IMarketplace {
     function acceptBid(INFTContract nft, uint256 tokenID) external override {
         address nftAddress = address(nft);
         require(
-            nft.ownerOf(tokenID) == msg.sender,
+            nft.quantityOf(msg.sender, tokenID) > 0,
             REVERT_NOT_OWNER_OF_TOKEN_ID
         );
 
-        nft.safeTransferFrom_(
+        bool success = nft.safeTransferFrom_(
             msg.sender,
             bids[nftAddress][tokenID].buyer,
             tokenID,
             new bytes(0)
         );
+        require(success, REVERT_NFT_NOT_SENT);
         escrow[msg.sender] += bids[nftAddress][tokenID].price;
 
         emit BidAccepted({

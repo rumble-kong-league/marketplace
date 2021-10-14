@@ -63,18 +63,17 @@ def test_accept_bid_721(setup, A):
     assert setup.marketplace.escrow(A.asker) == price
 
 
-# kownerOf has a lot of issues, think of a better way to implement it
-# def test_accept_bid_1155(setup, A):
-#     setup.e1155.faucet({"from": A.asker})
-#     token_id, price = 1, "1 ether"
+def test_accept_bid_1155(setup, A):
+    setup.e1155.faucet({"from": A.asker})
+    token_id, price = 1, "1 ether"
 
-#     assert setup.e1155.balanceOf(A.asker, token_id) == 10
-#     assert setup.marketplace.escrow(A.asker) == 0
+    assert setup.e1155.balanceOf(A.asker, token_id) == 10
+    assert setup.marketplace.escrow(A.asker) == 0
 
-#     setup.marketplace.bid(setup.e1155, token_id, {"from": A.bidder, "value": price})
-#     setup.e1155.setApprovalForAll(setup.marketplace, True, {"from": A.asker})
-#     setup.marketplace.acceptBid(setup.e1155, token_id, {"from": A.asker})
+    setup.marketplace.bid(setup.e1155, token_id, {"from": A.bidder, "value": price})
+    setup.e1155.setApprovalForAll(setup.marketplace, True, {"from": A.asker})
+    setup.marketplace.acceptBid(setup.e1155, token_id, {"from": A.asker})
 
-#     assert setup.e1155.balanceOf(A.asker, token_id) == 9
-#     assert setup.e1155.balanceOf(A.bidder, token_id) == 1
-#     assert setup.marketplace.escrow(A.asker) == price
+    assert setup.e1155.balanceOf(A.asker, token_id) == 9
+    assert setup.e1155.balanceOf(A.bidder, token_id) == 1
+    assert setup.marketplace.escrow(A.asker) == price
