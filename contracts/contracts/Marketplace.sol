@@ -29,7 +29,35 @@ contract Marketplace is IMarketplace {
             "Ask(address nft,uint256 tokenID,uint256 price,address to,uint256 nonce,uint256 deadline)"
         );
 
+    // ================
+
+    string private constant REVERT_NOT_OWNER_OF_TOKEN_ID =
+        "Marketplace::not an owner of token ID";
+    string private constant REVERT_OWNER_OF_TOKEN_ID =
+        "Marketplace::owner of token ID";
+    string private constant REVERT_BID_TOO_LOW = "Marketplace::bid too low";
+    string private constant REVERT_NOT_A_CREATOR_OF_BID =
+        "Marketplace::not a creator of the bid";
+    string private constant REVERT_ASK_DOES_NOT_EXIST =
+        "Marketplace::ask does not exist";
+    string private constant REVERT_CANT_ACCEPT_OWN_ASK =
+        "Marketplace::cant accept own ask";
+    string private constant REVERT_ASK_IS_RESERVED =
+        "Marketplace::ask is reserved";
+    string private constant REVERT_ASK_INSUFFICIENT_VALUE =
+        "Marketplace::ask price higher than sent value";
+    string private constant REVERT_ASK_SELLER_NOT_OWNER =
+        "Marketplace::ask creator not owner";
+
     // ======= CREATE ASK OR BID =====================================
+
+    // creating ask requires you to have at least one amount of the NFT
+    // 1. checking that the owner of the 721 NFT tokenID is not a msg.sender is redundant,
+    // since there is a check that the owner is the msg.sender.
+    // 2. what is the worst that can happen if the owner of the 1155 NFT is zero address?
+    // that it calls this function. Which is not possible. If it did call this function,
+    // it would be able to create asks that other agents could interact with. Which in itself,
+    // isn't a bad scenario.
 
     function ask(
         INFTContract nft,
@@ -38,16 +66,11 @@ contract Marketplace is IMarketplace {
         address to
     ) external override {
         require(
-            nft.ownerOf(tokenID) != address(0),
-            "Marketplace::does not exist or burned."
-        );
-        // to place an ask, you must be an owner
-        require(
             nft.ownerOf(tokenID) == msg.sender,
-            "Marketplace::not an owner of token."
+            REVERT_NOT_OWNER_OF_TOKEN_ID
         );
-        // notice that this will overwrite any existing ask on this same NFT token ID
-        // or creates a new one
+
+        // overwristes or creates a new one
         asks[address(nft)][tokenID] = Ask({
             exists: true,
             seller: msg.sender,
@@ -63,14 +86,25 @@ contract Marketplace is IMarketplace {
         });
     }
 
+    // what happens if you do bid on an NFT that is in zero address
+    // what is the worst that can happen?
+    //   two modes of interacting with an existing bid: cancel bid or accept bid
+    // - you can cancel the bid any time, so you will get your money back
+    // - outside of your control: someone accepts the bid (if 1155, and 1 unit in zero address, but someone else
+    //     also has some qty of the NFT in their wallet). This will be a normal flow of accepting a bid.
+    //     Therefore, when someone bids on a single unit of 1155, they are bidding on all the 1155s
+    //     If someone is bidding on a certain qty of 1155, they are bidding on all the holders of the 1155
+    //        that hold that qty of 1155 or more.
+    // Therefore, it is not a problem if zero address has some quantity of 1155
+
     function bid(INFTContract nft, uint256 tokenID) external payable override {
         address nftAddress = address(nft);
-        // no point in bidding on burned or non-existent NFT token ID
-        require(nft.ownerOf(tokenID) != address(0), "");
-        // no point in bidding on your own NFT token ID
-        require(nft.ownerOf(tokenID) != msg.sender, "");
-        // require that bid value larger than the existing bid (if exists)
-        require(msg.value > bids[nftAddress][tokenID].price, "");
+        require(nft.ownerOf(tokenID) != msg.sender, REVERT_OWNER_OF_TOKEN_ID);
+        // require that bid value larger than the existing bid (if exists) or 0 (if doesn't)
+        require(
+            msg.value > bids[nftAddress][tokenID].price,
+            REVERT_BID_TOO_LOW
+        );
 
         // if there is an existing bid, then its bid price is lower
         // therefore, let the creator of that bid withdraw their bid
@@ -79,7 +113,7 @@ contract Marketplace is IMarketplace {
                 .price;
         }
 
-        // overwrite an existing bid, or create a new one
+        // overwristes or creates a new one
         bids[nftAddress][tokenID] = Bid({
             exists: true,
             buyer: msg.sender,
@@ -92,8 +126,10 @@ contract Marketplace is IMarketplace {
     // ======= CANCEL ASK OR BID =====================================
 
     function cancelAsk(INFTContract nft, uint256 tokenID) external override {
-        // to cancel the ask, you must be an owner of the NFT token ID
-        require(nft.ownerOf(tokenID) == msg.sender, "");
+        require(
+            nft.ownerOf(tokenID) == msg.sender,
+            REVERT_NOT_OWNER_OF_TOKEN_ID
+        );
 
         delete asks[address(nft)][tokenID];
 
@@ -102,7 +138,10 @@ contract Marketplace is IMarketplace {
 
     function cancelBid(INFTContract nft, uint256 tokenID) external override {
         address nftAddress = address(nft);
-        require(bids[nftAddress][tokenID].buyer == msg.sender, "");
+        require(
+            bids[nftAddress][tokenID].buyer == msg.sender,
+            REVERT_NOT_A_CREATOR_OF_BID
+        );
 
         escrow[msg.sender] += bids[nftAddress][tokenID].price;
 
@@ -126,26 +165,33 @@ contract Marketplace is IMarketplace {
         override
     {
         address nftAddress = address(nft);
-        // ask must exist to accept
-        require(asks[nftAddress][tokenID].exists, "");
-        // if you are owner of the NFT, you can't accept your own ask
-        require(asks[nftAddress][tokenID].seller != msg.sender, "");
-        // if the ask is not meant for everyone to accept, check that msg.sender
-        // can accept it
+
+        require(asks[nftAddress][tokenID].exists, REVERT_ASK_DOES_NOT_EXIST);
+        require(
+            asks[nftAddress][tokenID].seller != msg.sender,
+            REVERT_CANT_ACCEPT_OWN_ASK
+        );
         if (asks[nftAddress][tokenID].to != address(0)) {
-            require(asks[nftAddress][tokenID].to == msg.sender, "");
+            require(
+                asks[nftAddress][tokenID].to == msg.sender,
+                REVERT_ASK_IS_RESERVED
+            );
         }
-        // ensure that the accepter has sent sufficient money
-        require(msg.value == asks[nftAddress][tokenID].price, "");
-        // ensure that the owner of the NFT is still the same person that created
-        // the ask
-        require(asks[nftAddress][tokenID].seller == nft.ownerOf(tokenID), "");
+        require(
+            msg.value == asks[nftAddress][tokenID].price,
+            REVERT_ASK_INSUFFICIENT_VALUE
+        );
+        require(
+            nft.ownerOf(tokenID) == asks[nftAddress][tokenID].seller,
+            REVERT_ASK_SELLER_NOT_OWNER
+        );
 
         // send NFT, receive money
+        // * to send the NFT from seller, we need his signature
         // todo: _transfer(asks[tokenID].seller, msg.sender, tokenID);
         escrow[asks[nftAddress][tokenID].seller] += msg.value;
 
-        // if there is a bid from accepter, cancel and refund
+        // if there is a bid for this tokenID from msg.sender, cancel and refund
         if (bids[nftAddress][tokenID].buyer == msg.sender) {
             escrow[bids[nftAddress][tokenID].buyer] += bids[nftAddress][tokenID]
                 .price;
@@ -164,10 +210,12 @@ contract Marketplace is IMarketplace {
 
     function acceptBid(INFTContract nft, uint256 tokenID) external override {
         address nftAddress = address(nft);
-        // owner of the NFT is allowed to accept a bid on that NFT token ID
-        require(nft.ownerOf(tokenID) == msg.sender, "");
+        require(
+            nft.ownerOf(tokenID) == msg.sender,
+            REVERT_NOT_OWNER_OF_TOKEN_ID
+        );
 
-        nft.safuTransferFrom(
+        nft.safeTransferFrom_(
             msg.sender,
             bids[nftAddress][tokenID].buyer,
             tokenID,

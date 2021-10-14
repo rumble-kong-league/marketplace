@@ -15,7 +15,7 @@ library NFTCommon {
     /// @param to      Target address
     /// @param tokenID ID of the token type
     /// @param data    Additional data with no specified format, MUST be sent unaltered in call to `onERC1155Received` on `_to`
-    function safuTransferFrom(
+    function safeTransferFrom_(
         INFTContract nft,
         address from,
         address to,
@@ -31,8 +31,8 @@ library NFTCommon {
         }
     }
 
-    // todo: think of a better function name
-    // todo: function comments
+    // todo: this function will return qty 1 or more if a given address is owner of the NFT
+    // if not, return 0
 
     // function kownerOf(
     //     INFTContract nft,
