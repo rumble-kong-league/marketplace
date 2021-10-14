@@ -191,9 +191,12 @@ contract Marketplace is IMarketplace {
             REVERT_ASK_SELLER_NOT_OWNER
         );
 
-        // send NFT, receive money
-        // * to send the NFT from seller, we need his signature
-        // todo: _transfer(asks[tokenID].seller, msg.sender, tokenID);
+        nft.safeTransferFrom_(
+            asks[nftAddress][tokenID].seller,
+            msg.sender,
+            tokenID,
+            new bytes(0)
+        );
         escrow[asks[nftAddress][tokenID].seller] += msg.value;
 
         // if there is a bid for this tokenID from msg.sender, cancel and refund
