@@ -102,10 +102,10 @@ contract Marketplace is IMarketplace {
         address nftAddress = address(nft);
         // ! this will disallow bidding on 1155s that you already hold. Is this desired?
         // ! can this be ignored and agents be allowed to bid on what they have?
-        require(
-            nft.quantityOf(msg.sender, tokenID) == 0,
-            REVERT_OWNER_OF_TOKEN_ID
-        );
+        // require(
+        //     nft.quantityOf(msg.sender, tokenID) == 0,
+        //     REVERT_OWNER_OF_TOKEN_ID
+        // );
         // require bid larger than existing bid or 0 (if exists or doesn't)
         require(
             msg.value > bids[nftAddress][tokenID].price,
