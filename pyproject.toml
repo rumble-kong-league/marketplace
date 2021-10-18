@@ -6,10 +6,12 @@ authors = ["nazariyv <nazariy@inbox.ru>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.9,<3.10"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"
+eth-brownie = "^1.17.0"
+pytest = "^6.2.5"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
