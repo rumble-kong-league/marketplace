@@ -5,9 +5,13 @@ from brownie.network.account import Account
 from brownie.test import strategy
 from brownie import accounts, Marketplace, E721, E1155, ZERO_ADDRESS, reverts
 from hypothesis.stateful import precondition
-from typing import DefaultDict, Dict, List, Tuple, Optional
+from typing import DefaultDict, Dict, List, Tuple, Optional, TypeVar
 from collections import defaultdict
 from random import randint
+
+T = TypeVar("T")
+K = TypeVar("K")
+V = TypeVar("V")
 
 TO_ANYONE = ZERO_ADDRESS
 
@@ -75,6 +79,7 @@ class NFT:
         return f"NFT({s})"
 
 
+# TODO: to should be an Account as well
 @dataclass(frozen=True)
 class Ask:
     exists: bool
@@ -153,6 +158,7 @@ class StateMachine:
     def initialize(self):
         # initialize gets ran before each example
 
+        # todo: pull the token ids straight out of the event like in self.find_bidder
         token_e7_id = 1
         token_e1_id = 1
 
@@ -170,16 +176,24 @@ class StateMachine:
             token_e1_id += 1
 
     def invariant(self):
-        # invariants gets ran after each example
-
-        # check that bids len is the same as contract bids len
-        # check that asks len is the same as contract asks len
+        # invariants gets ran after each rule
 
         contract_bids = self.contract_bids()
         contract_asks = self.contract_asks()
+        state_bids = self.flatten_dict(self.bids)
+        state_asks = self.flatten_dict(self.asks)
 
-        assert len(contract_asks) == len(self.asks.keys())
-        assert len(contract_bids) == len(self.bids.keys())
+        assert len(contract_bids) == len(state_bids)
+        assert len(contract_asks) == len(state_asks)
+
+        map(
+            lambda bid: self.assert_equal_to_one(bid, state_bids),
+            contract_bids,
+        )
+        map(
+            lambda ask: self.assert_equal_to_one(ask, state_asks),
+            contract_asks,
+        )
 
         pr_purple("invariant")
 
@@ -219,14 +233,13 @@ class StateMachine:
 
         if existing_bid is None:
             self.marketplace.bid(*bid_args)
+            self.update_bids(bid)
+            pr_light_purple(f"{bid}")
         else:
             if existing_bid.price > bid.price:
                 # will not pass every time. If there is an existing bid with higer price, reverts with: "Marketplace::bid too low"
                 with reverts(self.marketplace.REVERT_BID_TOO_LOW()):
                     self.marketplace.bid(*bid_args)
-        self.update_bids(bid)
-
-        pr_light_purple(f"{bid}")
 
     def rule_cancel_bid(self):
         pr_light_purple("cancelled bid")
@@ -298,9 +311,26 @@ class StateMachine:
             return -1
 
     def update_asks(self, ask: Ask) -> None:
-        self.asks[ask.seller].append(ask)
+        # only create a new ask, if there isn't one
+        # if there is one for this nft and token_id - overwrite
+
+        ix = -1
+        for _ix, _ask in enumerate(self.asks[ask.seller]):
+            if (
+                _ask.nft.address == ask.nft.address
+                and _ask.nft.token_id == ask.nft.token_id
+            ):
+                ix = _ix
+                break
+
+        if ix == -1:
+            self.asks[ask.seller].append(ask)
+        else:
+            self.asks[ask.seller][ix] = ask
 
     def update_bids(self, bid: Bid) -> None:
+        # only create a new bid, if there isn't one
+        # if there is a bid for this nft and token_id - overwrite
         self.bids[bid.buyer].append(bid)
 
     def contract_asks(self) -> List[Ask]:
@@ -337,6 +367,7 @@ class StateMachine:
 
         return asks
 
+    # todo: very similar to contract_asks. DRY!
     def contract_bids(self) -> List[Bid]:
         bids: List[Bid] = []
         total_supply = self.e7.totalSupply() + 1
@@ -365,6 +396,18 @@ class StateMachine:
                 bids.append(bid)
 
         return bids
+
+    def assert_equal_to_one(item: T, others: List[T]) -> None:
+        for _item in others:
+            if item == _item:
+                return
+        assert False
+
+    def flatten_dict(self, d: Dict[K, V]) -> List[V]:
+        vs: List[V] = []
+        for k in d.keys():
+            vs = vs + d[k]
+        return vs
 
 
 def test_stateful(state_machine, A):
