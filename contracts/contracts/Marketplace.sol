@@ -31,24 +31,24 @@ contract Marketplace is IMarketplace {
 
     // ================
 
-    string private constant REVERT_NOT_OWNER_OF_TOKEN_ID =
+    string public constant REVERT_NOT_OWNER_OF_TOKEN_ID =
         "Marketplace::not an owner of token ID";
-    string private constant REVERT_OWNER_OF_TOKEN_ID =
+    string public constant REVERT_OWNER_OF_TOKEN_ID =
         "Marketplace::owner of token ID";
-    string private constant REVERT_BID_TOO_LOW = "Marketplace::bid too low";
-    string private constant REVERT_NOT_A_CREATOR_OF_BID =
+    string public constant REVERT_BID_TOO_LOW = "Marketplace::bid too low";
+    string public constant REVERT_NOT_A_CREATOR_OF_BID =
         "Marketplace::not a creator of the bid";
-    string private constant REVERT_ASK_DOES_NOT_EXIST =
+    string public constant REVERT_ASK_DOES_NOT_EXIST =
         "Marketplace::ask does not exist";
-    string private constant REVERT_CANT_ACCEPT_OWN_ASK =
+    string public constant REVERT_CANT_ACCEPT_OWN_ASK =
         "Marketplace::cant accept own ask";
-    string private constant REVERT_ASK_IS_RESERVED =
+    string public constant REVERT_ASK_IS_RESERVED =
         "Marketplace::ask is reserved";
-    string private constant REVERT_ASK_INSUFFICIENT_VALUE =
+    string public constant REVERT_ASK_INSUFFICIENT_VALUE =
         "Marketplace::ask price higher than sent value";
-    string private constant REVERT_ASK_SELLER_NOT_OWNER =
+    string public constant REVERT_ASK_SELLER_NOT_OWNER =
         "Marketplace::ask creator not owner";
-    string private constant REVERT_NFT_NOT_SENT = "Marketplace::NFT not sent";
+    string public constant REVERT_NFT_NOT_SENT = "Marketplace::NFT not sent";
 
     // ======= CREATE ASK OR BID =====================================
 
