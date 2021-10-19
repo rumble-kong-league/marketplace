@@ -4,7 +4,9 @@ import pytest
 from brownie.network.account import Account
 from brownie.test import strategy
 from brownie import accounts, Marketplace, E721, E1155, ZERO_ADDRESS, reverts
-from hypothesis.stateful import precondition
+
+# todo: look at brownie and hypothesis. See how this can be added
+# from hypothesis.stateful import precondition
 from typing import DefaultDict, Dict, List, Tuple, Optional, TypeVar
 from collections import defaultdict
 from random import randint
@@ -213,10 +215,23 @@ class StateMachine:
 
         pr_yellow(f"{ask}")
 
-    def rule_cancel_ask(self):
-        pr_yellow("cancelled ask")
+    # @precondition(lambda self: True == True)
+    def rule_cancel_ask(self, st_price):
+        if not self.there_is_at_least_one_ask():
+            self.rule_ask(st_price)
 
-    @precondition(lambda self: len(self.asks) != 0)
+        ask = self.get_ask()
+
+        self.marketplace.cancelAsk(
+            ask.nft.address, ask.nft.token_id, {"from": ask.seller}
+        )
+        self.remove_ask(ask)
+
+        pr_yellow(
+            f"cancelled ask. token_id={ask.nft.token_id},addr={ask.nft.address.address.lower()}"
+        )
+
+    # @precondition(lambda self: self.there_is_at_least_one_ask() == True)
     def rule_accept_ask(self):
         pr_yellow("accepted ask")
 
@@ -241,18 +256,30 @@ class StateMachine:
                 with reverts(self.marketplace.REVERT_BID_TOO_LOW()):
                     self.marketplace.bid(*bid_args)
 
-    def rule_cancel_bid(self):
-        pr_light_purple("cancelled bid")
+    # @precondition(lambda self: self.there_is_at_least_one_bid() == True)
+    def rule_cancel_bid(self, st_price):
+        if not self.there_is_at_least_one_bid():
+            self.rule_bid(st_price)
 
-    @precondition(lambda self: len(self.bids) != 0)
+        bid = self.get_bid()
+        self.marketplace.cancelBid(
+            bid.nft.address, bid.nft.token_id, {"from": bid.buyer}
+        )
+        self.remove_bid(bid)
+
+        pr_light_purple(
+            f"cancelled bid. token_id={bid.nft.token_id},addr={bid.nft.address.address.lower()}"
+        )
+
+    # @precondition(lambda self: self.there_is_at_least_one_bid() == True)
     def rule_accept_bid(self):
         pr_light_purple("accepted bid")
 
-    @precondition(lambda self: len(self.asks) != 0)
+    # @precondition(lambda self: self.there_is_at_least_one_ask() == True)
     def rule_transfer_has_ask(self):
         pr_cyan("transferred")
 
-    @precondition(lambda self: len(self.bids) != 0)
+    # @precondition(lambda self: self.there_is_at_least_one_bid() == True)
     def rule_transfer_has_bid_to(self):
         pr_cyan("transferred")
 
@@ -311,7 +338,7 @@ class StateMachine:
             return -1
 
     def update_asks(self, ask: Ask) -> None:
-        # only create a new ask, if there isn't one
+        # only create a new ask if there isn't one
         # if there is one for this nft and token_id - overwrite
 
         ix = -1
@@ -328,10 +355,42 @@ class StateMachine:
         else:
             self.asks[ask.seller][ix] = ask
 
+    def remove_ask(self, ask: Ask) -> None:
+
+        ix = -1
+
+        for _ix, _ask in enumerate(self.asks[ask.seller]):
+            if (
+                _ask.nft.address == ask.nft.address
+                and _ask.nft.token_id == ask.nft.token_id
+            ):
+                ix = _ix
+                break
+
+        self.asks[ask.seller] = [
+            _ask for _ix, _ask in enumerate(self.asks[ask.seller]) if _ix != ix
+        ]
+
     def update_bids(self, bid: Bid) -> None:
         # only create a new bid, if there isn't one
         # if there is a bid for this nft and token_id - overwrite
         self.bids[bid.buyer].append(bid)
+
+    def remove_bid(self, bid: Bid) -> None:
+
+        ix = -1
+
+        for _ix, _bid in enumerate(self.bids[bid.buyer]):
+            if (
+                _bid.nft.address == bid.nft.address
+                and _bid.nft.token_id == bid.nft.token_id
+            ):
+                ix = _ix
+                break
+
+        self.bids[bid.buyer] = [
+            _bid for _ix, _bid in enumerate(self.bids[bid.buyer]) if _ix != ix
+        ]
 
     def contract_asks(self) -> List[Ask]:
         asks: List[Ask] = []
@@ -408,6 +467,37 @@ class StateMachine:
         for k in d.keys():
             vs = vs + d[k]
         return vs
+
+    def there_is_at_least_one_ask(self) -> bool:
+        ask = self.get_ask()
+        if ask is None:
+            return False
+        else:
+            return True
+
+    def there_is_at_least_one_bid(self) -> bool:
+        bid = self.get_bid()
+        if bid is None:
+            return False
+        else:
+            return True
+
+    def get_bid(self) -> Optional[Bid]:
+        """
+        Gives back first bid that it finds
+        """
+        for _, bids in self.bids.items():
+            if len(bids) > 0:
+                return bids[0]
+        return None
+
+    def get_ask(self) -> Optional[Ask]:
+        """
+        Gives back first ask that it finds
+        """
+        for _, asks in self.asks.items():
+            if len(asks) > 0:
+                return asks[0]
 
 
 def test_stateful(state_machine, A):
