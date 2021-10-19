@@ -3,10 +3,13 @@ import json
 import pytest
 from brownie.network.account import Account
 from brownie.test import strategy
-from brownie import accounts, Marketplace, E721, E1155
+from brownie import accounts, Marketplace, E721, E1155, ZERO_ADDRESS
 from hypothesis.stateful import precondition
 from typing import DefaultDict, List, Dict, Tuple
 from collections import defaultdict
+
+
+TO_ANYONE = ZERO_ADDRESS
 
 
 def pr_red(skk):
@@ -61,8 +64,21 @@ def A():
 
 
 @dataclass(frozen=True)
+class NFT:
+    address: Account
+    tokenID: int
+
+    def __repr__(self) -> str:
+        s = json.dumps(
+            {"address": self.address.address.lower(), "tokenID": self.tokenID}
+        )
+        return f"NFT({s})"
+
+
+@dataclass(frozen=True)
 class Ask:
     exists: bool
+    nft: NFT
     seller: Account
     price: int
     to: str
@@ -71,6 +87,7 @@ class Ask:
         s = json.dumps(
             {
                 "exists": self.exists,
+                "nft": str(self.nft),
                 "seller": self.seller.address.lower(),
                 "price": self.price,
                 "to": self.to,
@@ -87,6 +104,7 @@ class Ask:
 @dataclass(frozen=True)
 class Bid:
     exists: bool
+    nft: NFT
     buyer: Account
     price: int
 
@@ -94,6 +112,7 @@ class Bid:
         s = json.dumps(
             {
                 "exists": self.exists,
+                "nft": str(self.NFT),
                 "buyer": self.buyer.address.lower(),
                 "price": self.price,
             },
@@ -107,9 +126,13 @@ class Bid:
 
 
 TokenID = int
+WithdrawableBalance = int
 
 
 class StateMachine:
+
+    st_price = strategy("uint256")
+
     def __init__(cls, A, marketplace, e7, e1):
         cls.accounts = A
         cls.marketplace = marketplace
@@ -120,13 +143,11 @@ class StateMachine:
     def setup(self):
         # state sits here. This gets ran once
 
-        self.bids = dict()
-        self.asks = dict()
+        self.bids: DefaultDict[Account, List[Bid]] = defaultdict(list)
+        self.asks: DefaultDict[Account, List[Ask]] = defaultdict(list)
 
-        self.holdership: DefaultDict[
-            Account, List[Tuple[Account, TokenID]]
-        ] = defaultdict(list)
-        self.escrow = dict()
+        self.holdership: DefaultDict[Account, List[NFT]] = defaultdict(list)
+        self.escrow: DefaultDict[Account, WithdrawableBalance] = defaultdict(int)
 
     def initialize(self):
         # initialize gets ran before each example
@@ -139,10 +160,10 @@ class StateMachine:
             self.e7.faucet({"from": asker})
             self.e1.faucet({"from": asker})
             self.holdership[Account(asker)].append(
-                (Account(self.e7.address), token_e7_id)
+                NFT(Account(self.e7.address), token_e7_id)
             )
             self.holdership[Account(asker)].append(
-                (Account(self.e1.address), token_e7_id)
+                NFT(Account(self.e1.address), token_e7_id)
             )
             token_e7_id += 1
             token_e1_id += 1
@@ -151,8 +172,17 @@ class StateMachine:
         # invariants gets ran afteer each example
         pr_purple("invariant")
 
-    def rule_ask(self):
-        pr_yellow("asking")
+    def rule_ask(self, price="st_price"):
+
+        asker, nft = self.find_asker()
+
+        ask = Ask(True, nft, asker, price, TO_ANYONE)
+        self.marketplace.ask(
+            ask.nft.address, ask.nft.tokenID, ask.price, TO_ANYONE, {"from": ask.seller}
+        )
+        self.update_asks(ask)
+
+        pr_yellow(f"{ask}")
 
     def rule_cancel_ask(self):
         pr_yellow("cancelled ask")
@@ -171,13 +201,43 @@ class StateMachine:
     def rule_accept_bid(self):
         pr_light_purple("accepted bid")
 
-    # todo: precondition that it has ask
+    @precondition(lambda self: len(self.asks) != 0)
     def rule_transfer_has_ask(self):
         pr_cyan("transferred")
 
-    # todo: precondition that it has a bid
+    @precondition(lambda self: len(self.bids) != 0)
     def rule_transfer_has_bid_to(self):
         pr_cyan("transferred")
+
+    # ---
+
+    def find_asker(self) -> Tuple[Account, NFT]:
+        """
+        Loops through holdership, to give the first available account that can place an ask
+        """
+        # this will always be valid as long as we are correctly updating the holdership
+        # that means:
+        # - update if someone accepts ask
+        # - update if someone accepts bid
+        # - update on transfers
+        for holder, nfts in self.holdership.items():
+            if len(nfts) > 0:
+                return (holder, nfts[0])
+
+    def find_bidder(self) -> Tuple[Account, NFT]:
+        """
+        Finds the account from which we can bid, and also find an NFT on which to bid
+        """
+
+        # this case will fail only if there is a single holder that holds **all** the NFTs
+        # and if that is the case, then there isn't a holder from which we can bid (avoiding
+        # bidding on one's NFTs that is)
+        for holder, nfts in self.holdership.items():
+            # todo: find the nft that the holder doesn't own
+            ...
+
+    def update_asks(self, ask: Ask) -> None:
+        self.asks[ask.seller].append(ask)
 
 
 def test_stateful(state_machine, A):
