@@ -39,3 +39,5 @@ RUN npm install -g ganache-cli
 WORKDIR /marketplace/contracts
 
 RUN brownie compile --all
+
+CMD ["/usr/local/bin/brownie","test"]
