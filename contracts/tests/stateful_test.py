@@ -1,7 +1,7 @@
 import pytest
-from brownie.network.account import Account
-from brownie.test import strategy
-from brownie import accounts, Marketplace, E721, E1155, ZERO_ADDRESS, reverts
+from brownie.network.account import Account # type: ignore
+from brownie.test import strategy # type: ignore
+from brownie import accounts, Marketplace, E721, E1155, ZERO_ADDRESS, reverts # type: ignore
 
 from hypothesis.stateful import precondition
 from typing import DefaultDict, Dict, List, Tuple, Optional, TypeVar, Set, Union
@@ -88,6 +88,7 @@ class StateMachine:
         assert len(contract_bids) == len(state_bids)
         assert len(contract_asks) == len(state_asks)
 
+        # todo: set equality
         map(
             lambda bid: self.assert_equal_to_one(bid, state_bids),
             contract_bids,
@@ -115,9 +116,9 @@ class StateMachine:
 
         pr_yellow(f"{ask}")
 
-    @precondition(lambda _: True == True)
+    # @precondition(lambda _: True == True)
     def rule_cancel_ask(self, st_price):
-        if not self.there_is_at_least_one_ask():
+        if self.get_ask() is None:
             self.rule_ask(st_price)
 
         ask = self.get_ask()
@@ -152,13 +153,12 @@ class StateMachine:
             pr_light_purple(f"{bid}")
         else:
             if existing_bid.price > bid.price:
-                # will not pass every time. If there is an existing bid with higer price, reverts with: "Marketplace::bid too low"
                 with reverts(self.marketplace.REVERT_BID_TOO_LOW()):
                     self.marketplace.bid(*bid_args)
 
-    @precondition(lambda _: True == True)
+    # @precondition(lambda _: True == True)
     def rule_cancel_bid(self, st_price):
-        if not self.there_is_at_least_one_bid():
+        if self.get_bid() is None:
             self.rule_bid(st_price)
 
         bid = self.get_bid()
@@ -257,6 +257,11 @@ class StateMachine:
         else:
             self.asks[ask.seller][ix] = ask
 
+    def update_bids(self, bid: Bid) -> None:
+        # only create a new bid, if there isn't one
+        # if there is a bid for this nft and token_id - overwrite
+        self.bids[bid.buyer].append(bid)
+
     def remove_ask(self, ask: Ask) -> None:
 
         ix = -1
@@ -272,11 +277,6 @@ class StateMachine:
         self.asks[ask.seller] = [
             _ask for _ix, _ask in enumerate(self.asks[ask.seller]) if _ix != ix
         ]
-
-    def update_bids(self, bid: Bid) -> None:
-        # only create a new bid, if there isn't one
-        # if there is a bid for this nft and token_id - overwrite
-        self.bids[bid.buyer].append(bid)
 
     def remove_bid(self, bid: Bid) -> None:
 
@@ -338,7 +338,7 @@ class StateMachine:
     def contract_bids(self) -> Set[Union[Ask, Bid]]:
         return self._contract_orders(ask_request=False, bid_request=True)
 
-    def assert_equal_to_one(item: T, others: List[T]) -> None:
+    def assert_equal_to_one(self, item: T, others: List[T]) -> None:
         for _item in others:
             if item == _item:
                 return
@@ -350,37 +350,27 @@ class StateMachine:
             vs = vs + d[k]
         return vs
 
-    def there_is_at_least_one_ask(self) -> bool:
-        ask = self.get_ask()
-        if ask is None:
-            return False
-        else:
-            return True
+    def _get_first_order(self, *, ask_request: bool, bid_request: bool) -> Optional[Union[Ask, Bid]]:
+      if ask_request == True and bid_request == True:
+        raise Exception("invalid")
+      if ask_request == False and bid_request == False:
+        raise Exception("invalid")
 
-    def there_is_at_least_one_bid(self) -> bool:
-        bid = self.get_bid()
-        if bid is None:
-            return False
-        else:
-            return True
+      order: Optional[Union[Ask, Bid]] = None
+      accs_orders = self.asks if ask_request == True else self.bids
+
+      for _, orders in accs_orders.items(): # type: ignore
+        if len(orders) > 0:
+          order = orders[0]
+          return order
+
+      return order
 
     def get_bid(self) -> Optional[Bid]:
-        """
-        Gives back first bid that it finds
-        """
-        for _, bids in self.bids.items():
-            if len(bids) > 0:
-                return bids[0]
-        return None
+        return self._get_first_order(ask_request=False, bid_request=True) # type: ignore
 
     def get_ask(self) -> Optional[Ask]:
-        """
-        Gives back first ask that it finds
-        """
-        for _, asks in self.asks.items():
-            if len(asks) > 0:
-                return asks[0]
-        return None
+        return self._get_first_order(ask_request=True, bid_request=False) # type: ignore
 
 
 def test_stateful(state_machine, A):
