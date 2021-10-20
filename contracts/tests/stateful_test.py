@@ -4,7 +4,7 @@ from brownie.test import strategy
 from brownie import accounts, Marketplace, E721, E1155, ZERO_ADDRESS, reverts
 
 from hypothesis.stateful import precondition
-from typing import DefaultDict, Dict, List, Tuple, Optional, TypeVar
+from typing import DefaultDict, Dict, List, Tuple, Optional, TypeVar, Set, Union
 from collections import defaultdict
 from random import randint
 
@@ -292,69 +292,49 @@ class StateMachine:
             _bid for _ix, _bid in enumerate(self.bids[bid.buyer]) if _ix != ix
         ]
 
+    def _contract_orders(
+        self, *, ask_request: bool, bid_request: bool
+    ) -> Set[Union[Ask, Bid]]:
+        if ask_request == False and bid_request == False:
+            raise Exception("invalid")
+        if ask_request == True and bid_request == True:
+            raise Exception("invalid")
+
+        orders: Set[Union[Ask, Bid]] = set()
+
+        contract_func = (
+            self.marketplace.asks if ask_request == True else self.marketplace.bids
+        )
+
+        for nft in [self.e7, self.e1]:
+            # plus one, because token index starts at 1
+            total_supply = nft.totalSupply() + 1
+
+            for token_id in range(total_supply):
+                _order = contract_func(nft.address, token_id)
+                order = None
+                if _order[0] == True:
+                    nft = NFT(nft.address, token_id)
+
+                    if ask_request == True:
+                        # todo: _order[3] should be an Account
+                        order = Ask(
+                            True, nft, Account(_order[1]), int(_order[2]), _order[3]
+                        )
+                    elif bid_request == True:
+                        order = Bid(True, nft, Account(_order[1]), int(_order[2]))
+                    else:
+                        raise Exception("unknown")
+
+                    orders.add(order)
+
+        return orders
+
     def contract_asks(self) -> List[Ask]:
-        asks: List[Ask] = []
-        total_supply = self.e7.totalSupply() + 1
+        return self._contract_orders(ask_request=True, bid_request=False)
 
-        for token_id in range(total_supply):
-            _ask = self.marketplace.asks(self.e7.address, token_id)
-            # if ask exists
-            if _ask[0] == True:
-                ask = Ask(
-                    True,
-                    NFT(self.e7.address, token_id),
-                    Account(_ask[1]),
-                    int(_ask[2]),
-                    _ask[3],
-                )
-                asks.append(ask)
-
-        total_supply = self.e1.totalSupply() + 1
-
-        for token_id in range(total_supply):
-            _ask = self.marketplace.asks(self.e1.address, token_id)
-            # if ask exists
-            if _ask[0] == True:
-                ask = Ask(
-                    True,
-                    NFT(self.e1.address, token_id),
-                    Account(_ask[1]),
-                    int(_ask[2]),
-                    _ask[3],
-                )
-                asks.append(ask)
-
-        return asks
-
-    # todo: very similar to contract_asks. DRY!
     def contract_bids(self) -> List[Bid]:
-        bids: List[Bid] = []
-        total_supply = self.e7.totalSupply() + 1
-
-        for token_id in range(total_supply):
-            _bid = self.marketplace.bids(self.e7.address, token_id)
-            # if bid exists
-            if _bid[0] == True:
-                bid = Bid(
-                    True,
-                    NFT(self.e7.address, token_id),
-                    Account(_bid[1]),
-                    int(_bid[2]),
-                )
-                bids.append(bid)
-
-        total_supply = self.e1.totalSupply() + 1
-
-        for token_id in range(total_supply):
-            _bid = self.marketplace.bids(self.e1.address, token_id)
-            # if ask exists
-            if _bid[0] == True:
-                bid = Bid(
-                    True, NFT(self.e1.address, token_id), Account(_bid[1]), int(_bid[2])
-                )
-                bids.append(bid)
-
-        return bids
+        return self._contract_orders(ask_request=False, bid_request=True)
 
     def assert_equal_to_one(item: T, others: List[T]) -> None:
         for _item in others:
