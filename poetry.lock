@@ -2,7 +2,7 @@
 name = "aiohttp"
 version = "3.7.4.post0"
 description = "Async http client/server framework (asyncio)"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -21,7 +21,7 @@ speedups = ["aiodns", "brotlipy", "cchardet"]
 name = "asttokens"
 version = "2.0.4"
 description = "Annotate AST trees with source code positions"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -35,7 +35,7 @@ test = ["astroid", "pytest"]
 name = "async-timeout"
 version = "3.0.1"
 description = "Timeout context manager for asyncio programs"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5.3"
 
@@ -43,7 +43,7 @@ python-versions = ">=3.5.3"
 name = "atomicwrites"
 version = "1.4.0"
 description = "Atomic file writes."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -51,7 +51,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "attrs"
 version = "21.2.0"
 description = "Classes Without Boilerplate"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -65,7 +65,7 @@ tests_no_zope = ["coverage[toml] (>=5.0.2)", "hypothesis", "pympler", "pytest (>
 name = "base58"
 version = "2.1.0"
 description = "Base58 and Base58Check implementation."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -76,7 +76,7 @@ tests = ["pytest (>=4.6)", "pytest-flake8", "pytest-cov", "PyHamcrest (>=2.0.2)"
 name = "bitarray"
 version = "1.2.2"
 description = "efficient arrays of booleans -- C extension"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -84,7 +84,7 @@ python-versions = "*"
 name = "black"
 version = "21.9b0"
 description = "The uncompromising code formatter."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6.2"
 
@@ -108,7 +108,7 @@ uvloop = ["uvloop (>=0.15.2)"]
 name = "certifi"
 version = "2021.10.8"
 description = "Python package for providing Mozilla's CA Bundle."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -116,7 +116,7 @@ python-versions = "*"
 name = "chardet"
 version = "4.0.0"
 description = "Universal encoding detector for Python 2 and 3"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -124,7 +124,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "charset-normalizer"
 version = "2.0.7"
 description = "The Real First Universal Charset Detector. Open, modern and actively maintained alternative to Chardet."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5.0"
 
@@ -135,7 +135,7 @@ unicode_backport = ["unicodedata2"]
 name = "click"
 version = "8.0.3"
 description = "Composable command line interface toolkit"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -146,7 +146,7 @@ colorama = {version = "*", markers = "platform_system == \"Windows\""}
 name = "colorama"
 version = "0.4.4"
 description = "Cross-platform colored terminal text."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -154,7 +154,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "cytoolz"
 version = "0.11.0"
 description = "Cython implementation of Toolz: High performance functional utilities"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -168,7 +168,7 @@ cython = ["cython"]
 name = "dataclassy"
 version = "0.11.0"
 description = "A fast and flexible reimplementation of data classes"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -176,7 +176,7 @@ python-versions = ">=3.6"
 name = "eip712"
 version = "0.1.0"
 description = "eip712: Message classes for typed structured data hashing and signing in Ethereum"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6,<4"
 
@@ -199,7 +199,7 @@ test = ["pytest (>=6.0,<7.0)", "pytest-xdist", "pytest-cov", "hypothesis (>=6.2.
 name = "eth-abi"
 version = "2.1.1"
 description = "eth_abi: Python utilities for working with Ethereum ABI definitions, especially encoding and decoding"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6, <4"
 
@@ -219,7 +219,7 @@ tools = ["hypothesis (>=3.6.1,<4)"]
 name = "eth-account"
 version = "0.5.6"
 description = "eth-account: Sign Ethereum transactions and messages with local private keys"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6, <4"
 
@@ -243,7 +243,7 @@ test = ["hypothesis (>=4.18.0,<5)", "pytest (==5.4.1)", "pytest-xdist", "tox (==
 name = "eth-brownie"
 version = "1.17.0"
 description = "A Python framework for Ethereum smart contract deployment, testing and interaction."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7,<4"
 
@@ -335,7 +335,7 @@ yarl = "1.7.0"
 name = "eth-event"
 version = "1.2.3"
 description = "Ethereum event decoder and topic generator"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6, <4"
 
@@ -349,7 +349,7 @@ hexbytes = ">=0.2.0,<1.0.0"
 name = "eth-hash"
 version = "0.3.2"
 description = "eth-hash: The Ethereum hashing function, keccak256, sometimes (erroneously) called sha3"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5, <4"
 
@@ -368,7 +368,7 @@ test = ["pytest (==5.4.1)", "pytest-xdist", "tox (==3.14.6)"]
 name = "eth-keyfile"
 version = "0.5.1"
 description = "A library for handling the encrypted keyfiles used to store ethereum private keys."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -382,7 +382,7 @@ pycryptodome = ">=3.4.7,<4.0.0"
 name = "eth-keys"
 version = "0.3.3"
 description = "Common API for Ethereum key operations."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -401,7 +401,7 @@ test = ["asn1tools (>=0.146.2,<0.147)", "pyasn1 (>=0.4.5,<0.5)", "pytest (==3.2.
 name = "eth-rlp"
 version = "0.2.1"
 description = "eth-rlp: RLP definitions for common Ethereum objects in Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6, <4"
 
@@ -420,7 +420,7 @@ test = ["eth-hash", "pytest-xdist", "pytest (==5.4.1)", "tox (==3.14.6)"]
 name = "eth-typing"
 version = "2.2.2"
 description = "eth-typing: Common type annotations for ethereum python packages"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5, <4"
 
@@ -434,7 +434,7 @@ test = ["pytest (>=4.4,<4.5)", "pytest-xdist", "tox (>=2.9.1,<3)"]
 name = "eth-utils"
 version = "1.10.0"
 description = "eth-utils: Common utility functions for python code that interacts with Ethereum"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5,!=3.5.2,<4"
 
@@ -454,7 +454,7 @@ test = ["hypothesis (>=4.43.0,<5.0.0)", "pytest (==5.4.1)", "pytest-xdist", "tox
 name = "execnet"
 version = "1.9.0"
 description = "execnet: rapid multi-Python deployment"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -465,7 +465,7 @@ testing = ["pre-commit"]
 name = "hexbytes"
 version = "0.2.2"
 description = "hexbytes: Python `bytes` subclass that decodes hex, with a readable console output"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6, <4"
 
@@ -479,7 +479,7 @@ test = ["eth-utils (>=1.0.1,<2)", "hypothesis (>=3.44.24,<4)", "pytest-xdist", "
 name = "hypothesis"
 version = "6.23.2"
 description = "A library for property-based testing"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -507,7 +507,7 @@ zoneinfo = ["importlib-resources (>=3.3.0)", "backports.zoneinfo (>=0.2.1)", "tz
 name = "idna"
 version = "3.2"
 description = "Internationalized Domain Names in Applications (IDNA)"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -515,7 +515,7 @@ python-versions = ">=3.5"
 name = "inflection"
 version = "0.5.0"
 description = "A port of Ruby on Rails inflector to Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -523,7 +523,7 @@ python-versions = ">=3.5"
 name = "iniconfig"
 version = "1.1.1"
 description = "iniconfig: brain-dead simple config-ini parsing"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -531,7 +531,7 @@ python-versions = "*"
 name = "ipfshttpclient"
 version = "0.8.0a2"
 description = "Python IPFS HTTP CLIENT library"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6.2,!=3.7.0,!=3.7.1"
 
@@ -543,7 +543,7 @@ requests = ">=2.11"
 name = "jsonschema"
 version = "3.2.0"
 description = "An implementation of JSON Schema validation for Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -560,7 +560,7 @@ format_nongpl = ["idna", "jsonpointer (>1.13)", "webcolors", "rfc3986-validator 
 name = "lazy-object-proxy"
 version = "1.6.0"
 description = "A fast and thorough lazy object proxy."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 
@@ -568,7 +568,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 name = "lru-dict"
 version = "1.1.7"
 description = "An Dict like LRU container."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -576,7 +576,7 @@ python-versions = "*"
 name = "multiaddr"
 version = "0.0.9"
 description = "Python implementation of jbenet's multiaddr"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
 
@@ -590,7 +590,7 @@ varint = "*"
 name = "multidict"
 version = "5.2.0"
 description = "multidict implementation"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -598,7 +598,7 @@ python-versions = ">=3.6"
 name = "mypy-extensions"
 version = "0.4.3"
 description = "Experimental type system extensions for programs checked with the mypy typechecker."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -606,7 +606,7 @@ python-versions = "*"
 name = "mythx-models"
 version = "1.9.1"
 description = "Python domain model classes for the MythX platform"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -619,7 +619,7 @@ python-dateutil = "2.8.1"
 name = "netaddr"
 version = "0.8.0"
 description = "A network address manipulation library for Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -627,7 +627,7 @@ python-versions = "*"
 name = "packaging"
 version = "21.0"
 description = "Core utilities for Python packages"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -638,7 +638,7 @@ pyparsing = ">=2.0.2"
 name = "parsimonious"
 version = "0.8.1"
 description = "(Soon to be) the fastest pure-Python PEG parser I could muster"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -649,7 +649,7 @@ six = ">=1.9.0"
 name = "pathspec"
 version = "0.9.0"
 description = "Utility library for gitignore style pattern matching of file paths."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 
@@ -657,7 +657,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 name = "platformdirs"
 version = "2.4.0"
 description = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -669,7 +669,7 @@ test = ["appdirs (==1.4.4)", "pytest (>=6)", "pytest-cov (>=2.7)", "pytest-mock 
 name = "pluggy"
 version = "1.0.0"
 description = "plugin and hook calling mechanisms for python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -681,7 +681,7 @@ testing = ["pytest", "pytest-benchmark"]
 name = "prompt-toolkit"
 version = "3.0.20"
 description = "Library for building powerful interactive command lines in Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6.2"
 
@@ -692,7 +692,7 @@ wcwidth = "*"
 name = "protobuf"
 version = "3.18.1"
 description = "Protocol Buffers"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -700,7 +700,7 @@ python-versions = ">=3.5"
 name = "psutil"
 version = "5.8.0"
 description = "Cross-platform lib for process and system monitoring in Python."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -711,7 +711,7 @@ test = ["ipaddress", "mock", "unittest2", "enum34", "pywin32", "wmi"]
 name = "py"
 version = "1.10.0"
 description = "library with cross-python path, ini-parsing, io, code, log facilities"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -719,7 +719,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "py-solc-ast"
 version = "1.2.9"
 description = "A tool for exploring the abstract syntax tree generated by solc."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6, <4"
 
@@ -727,7 +727,7 @@ python-versions = ">=3.6, <4"
 name = "py-solc-x"
 version = "1.1.1"
 description = "Python wrapper and version management tool for the solc Solidity compiler."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6, <4"
 
@@ -739,7 +739,7 @@ semantic-version = ">=2.8.1,<3"
 name = "pycryptodome"
 version = "3.11.0"
 description = "Cryptographic library for Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -747,7 +747,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 name = "pygments"
 version = "2.10.0"
 description = "Pygments is a syntax highlighting package written in Python."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -755,7 +755,7 @@ python-versions = ">=3.5"
 name = "pygments-lexer-solidity"
 version = "0.7.0"
 description = "Solidity lexer for Pygments (includes Yul intermediate language)"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.3, <4"
 
@@ -766,7 +766,7 @@ pygments = ">=2.1"
 name = "pyjwt"
 version = "1.7.1"
 description = "JSON Web Token implementation in Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -779,7 +779,7 @@ test = ["pytest (>=4.0.1,<5.0.0)", "pytest-cov (>=2.6.0,<3.0.0)", "pytest-runner
 name = "pyparsing"
 version = "2.4.7"
 description = "Python parsing module"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -787,7 +787,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "pyrsistent"
 version = "0.18.0"
 description = "Persistent/Functional/Immutable data structures"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -795,7 +795,7 @@ python-versions = ">=3.6"
 name = "pytest"
 version = "6.2.5"
 description = "pytest: simple powerful testing with Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -816,7 +816,7 @@ testing = ["argcomplete", "hypothesis (>=3.56)", "mock", "nose", "requests", "xm
 name = "pytest-forked"
 version = "1.3.0"
 description = "run tests in isolated forked subprocesses"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -828,7 +828,7 @@ pytest = ">=3.10"
 name = "pytest-xdist"
 version = "1.34.0"
 description = "pytest xdist plugin for distributed testing and loop-on-failing modes"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*"
 
@@ -845,7 +845,7 @@ testing = ["filelock"]
 name = "python-dateutil"
 version = "2.8.1"
 description = "Extensions to the standard Python datetime module"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 
@@ -856,7 +856,7 @@ six = ">=1.5"
 name = "python-dotenv"
 version = "0.16.0"
 description = "Read key-value pairs from a .env file and set them as environment variables"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -867,7 +867,7 @@ cli = ["click (>=5.0)"]
 name = "pythx"
 version = "1.6.1"
 description = "A Python library for the MythX platform"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -882,7 +882,7 @@ requests = ">=2.0.0,<3.0.0"
 name = "pywin32"
 version = "302"
 description = "Python for Window Extensions"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -890,7 +890,7 @@ python-versions = "*"
 name = "pyyaml"
 version = "5.4.1"
 description = "YAML parser and emitter for Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 
@@ -898,7 +898,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 name = "regex"
 version = "2021.10.8"
 description = "Alternative regular expression module, to replace re."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -906,7 +906,7 @@ python-versions = "*"
 name = "requests"
 version = "2.26.0"
 description = "Python HTTP for Humans."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
 
@@ -924,7 +924,7 @@ use_chardet_on_py3 = ["chardet (>=3.0.2,<5)"]
 name = "rlp"
 version = "1.2.0"
 description = "A package for Recursive Length Prefix encoding and decoding"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -941,7 +941,7 @@ test = ["pytest (==3.3.2)", "tox (>=2.9.1,<3)", "hypothesis (==3.56.5)"]
 name = "semantic-version"
 version = "2.8.5"
 description = "A library implementing the 'SemVer' scheme."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
@@ -949,7 +949,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 name = "six"
 version = "1.16.0"
 description = "Python 2 and 3 compatibility utilities"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -957,7 +957,7 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "sortedcontainers"
 version = "2.4.0"
 description = "Sorted Containers -- Sorted List, Sorted Dict, Sorted Set"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -965,7 +965,7 @@ python-versions = "*"
 name = "toml"
 version = "0.10.2"
 description = "Python Library for Tom's Obvious, Minimal Language"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 
@@ -973,7 +973,7 @@ python-versions = ">=2.6, !=3.0.*, !=3.1.*, !=3.2.*"
 name = "tomli"
 version = "1.2.1"
 description = "A lil' TOML parser"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -981,7 +981,7 @@ python-versions = ">=3.6"
 name = "toolz"
 version = "0.11.1"
 description = "List processing tools and functional utilities"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.5"
 
@@ -989,7 +989,7 @@ python-versions = ">=3.5"
 name = "tqdm"
 version = "4.62.3"
 description = "Fast, Extensible Progress Meter"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,>=2.7"
 
@@ -1005,7 +1005,7 @@ telegram = ["requests"]
 name = "typing-extensions"
 version = "3.10.0.2"
 description = "Backported and Experimental Type Hints for Python 3.5+"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1013,7 +1013,7 @@ python-versions = "*"
 name = "urllib3"
 version = "1.26.7"
 description = "HTTP library with thread-safe connection pooling, file post, and more."
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, <4"
 
@@ -1026,7 +1026,7 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 name = "varint"
 version = "1.0.2"
 description = "Simple python varint implementation"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1034,7 +1034,7 @@ python-versions = "*"
 name = "vvm"
 version = "0.1.0"
 description = "Vyper version management tool"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6, <4"
 
@@ -1046,7 +1046,7 @@ semantic-version = ">=2.8.1,<3"
 name = "vyper"
 version = "0.3.0"
 description = "Vyper: the Pythonic Programming Language for the EVM"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.7,<3.10"
 
@@ -1065,7 +1065,7 @@ test = ["pytest (>=5.4,<6.0)", "pytest-cov (>=2.10,<3.0)", "pytest-instafail (>=
 name = "wcwidth"
 version = "0.2.5"
 description = "Measures the displayed width of unicode strings in a terminal"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 
@@ -1073,7 +1073,7 @@ python-versions = "*"
 name = "web3"
 version = "5.24.0"
 description = "Web3.py"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6,<4"
 
@@ -1103,7 +1103,7 @@ tester = ["eth-tester[py-evm] (==v0.5.0-beta.4)", "py-geth (>=3.5.0,<4)"]
 name = "websockets"
 version = "9.1"
 description = "An implementation of the WebSocket Protocol (RFC 6455 & 7692)"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6.1"
 
@@ -1111,7 +1111,7 @@ python-versions = ">=3.6.1"
 name = "wrapt"
 version = "1.13.1"
 description = "Module for decorators, wrappers and monkey patching."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 
@@ -1119,7 +1119,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 name = "yarl"
 version = "1.7.0"
 description = "Yet another URL library"
-category = "main"
+category = "dev"
 optional = false
 python-versions = ">=3.6"
 
@@ -1130,7 +1130,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9,<3.10"
-content-hash = "7a92b539f7c8a07b94b4b3fb5ddddf922dd089318ee59821fab9366e17c1c896"
+content-hash = "0e90af71d1660ddf1e65d54a929b0f93bae9a6e509d99cc12073f558ff20d2e4"
 
 [metadata.files]
 aiohttp = [
@@ -1220,26 +1220,6 @@ colorama = [
     {file = "colorama-0.4.4.tar.gz", hash = "sha256:5941b2b48a20143d2267e95b1c2a7603ce057ee39fd88e7329b0c292aa16869b"},
 ]
 cytoolz = [
-    {file = "cytoolz-0.11.0-cp35-cp35m-macosx_10_6_x86_64.whl", hash = "sha256:c50051c02b23823209d6b0e8f7b2b37371312da50ca78165871dc6fed7bd37df"},
-    {file = "cytoolz-0.11.0-cp35-cp35m-manylinux1_x86_64.whl", hash = "sha256:140eaadcd86216d4a185db3a37396ee80dd2edc6e490ba37a3d7c1b17a124078"},
-    {file = "cytoolz-0.11.0-cp35-cp35m-manylinux2010_x86_64.whl", hash = "sha256:c183237f4f0bac53238588e3567c0287130dd9ed6b6b880579a5cca960a89f54"},
-    {file = "cytoolz-0.11.0-cp35-cp35m-manylinux2014_x86_64.whl", hash = "sha256:6cba0572e3ad187e0ea0ddd20bb9c6aad794c23d997ed2b2aa2bbd109fe61f9f"},
-    {file = "cytoolz-0.11.0-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:c7ed490f7f5c069a5082b73803ff4595f12ed0eb6b52ffa5ffe15d532acb71ed"},
-    {file = "cytoolz-0.11.0-cp36-cp36m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:e2e7cbfec2681e8acfd0013e9581905f251455d411457a6f475ba1870d1685fc"},
-    {file = "cytoolz-0.11.0-cp36-cp36m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:596a40ce920dd6cdab42d3dec5a4e8bb0bf258bb79426a4ed7658a27c214941b"},
-    {file = "cytoolz-0.11.0-cp36-cp36m-win_amd64.whl", hash = "sha256:477f71b8b2c6fdd97aa3a421ba0cfd04b22ffed1b22dda3fea06db2756ee7097"},
-    {file = "cytoolz-0.11.0-cp37-cp37m-macosx_10_9_x86_64.whl", hash = "sha256:5692a100d657f9bc2fede44ff41649c0c577f251bc0bd06c699c177235a0f81c"},
-    {file = "cytoolz-0.11.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:8893b54f8d8d1bbc5a22dc4989d9b3eb269dd5ee1247993158e1f9ae0fbb9c88"},
-    {file = "cytoolz-0.11.0-cp37-cp37m-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:84519cf4f63308b0ce39162b7a341367338953cd9fbf7edd335cbc44dcd321e9"},
-    {file = "cytoolz-0.11.0-cp37-cp37m-win_amd64.whl", hash = "sha256:2f9963114029e78ddb626140cbb15b79ad0fd1563484b73fb29403a3d5bf3ed4"},
-    {file = "cytoolz-0.11.0-cp38-cp38-macosx_10_9_x86_64.whl", hash = "sha256:c65635ad93bac9002e36d42603bd87514e8ea932910158054b409ceee05ff4fe"},
-    {file = "cytoolz-0.11.0-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:a6e95de2fe891075f71edb0a56701eeaae04d43f44470c24d45e89f1ea801e85"},
-    {file = "cytoolz-0.11.0-cp38-cp38-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:b4a3eb96eda360b14fa6c7d2ce6faf684319c051f9ea620b009cb28a2878ed32"},
-    {file = "cytoolz-0.11.0-cp38-cp38-win_amd64.whl", hash = "sha256:d0fdf0186201f882274db95fc5644ef34bfb0593d9db23b7343b0e6c8c000a0a"},
-    {file = "cytoolz-0.11.0-cp39-cp39-macosx_10_9_x86_64.whl", hash = "sha256:f85a8e164ebbe75e77a9c8a0b91bd2a3ceb5beeb0f1c180affe75318a41df98c"},
-    {file = "cytoolz-0.11.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:fb1b6bb4dee54fe62306d7330639f57a0dbb612520516b97b1c9dea5bc506634"},
-    {file = "cytoolz-0.11.0-cp39-cp39-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:3159da30eaf214746215293fdba19b6b54af59b3b2ba979eb9e184c6c7a854d2"},
-    {file = "cytoolz-0.11.0-cp39-cp39-win_amd64.whl", hash = "sha256:b61f23e9fa7cd5a87a503ab659f816858e2235926cd95b0c7e37403530d4a2d6"},
     {file = "cytoolz-0.11.0.tar.gz", hash = "sha256:c64f3590c3eb40e1548f0d3c6b2ccde70493d0b8dc6cc7f9f3fec0bb3dcd4222"},
 ]
 dataclassy = [
