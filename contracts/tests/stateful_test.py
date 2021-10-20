@@ -36,8 +36,8 @@ def A():
     a = Accounts(accounts)
     return a
 
-TokenID = int
-WithdrawableBalance = int
+
+TokenID = WithdrawableBalance = int
 
 
 class StateMachine:
@@ -64,22 +64,18 @@ class StateMachine:
     def initialize(self):
         # initialize gets ran before each example
 
-        # todo: pull the token ids straight out of the event like in self.find_bidder
-        token_e7_id = 1
-        token_e1_id = 1
-
         # mint tradeable NFTs for askers
         for asker in self.accounts.askers:
-            self.e7.faucet({"from": asker})
-            self.e1.faucet({"from": asker})
+            e = self.e7.faucet({"from": asker})
+            ee = self.e1.faucet({"from": asker})
+            token_id_e7 = self.pluck_token_id(e.events)
+            token_id_e1 = self.pluck_token_id(ee.events)
             self.holdership[Account(asker)].append(
-                NFT(Account(self.e7.address), token_e7_id)
+                NFT(Account(self.e7.address), token_id_e7)
             )
             self.holdership[Account(asker)].append(
-                NFT(Account(self.e1.address), token_e7_id)
+                NFT(Account(self.e1.address), token_id_e1)
             )
-            token_e7_id += 1
-            token_e1_id += 1
 
     def invariant(self):
         # invariants gets ran after each rule
