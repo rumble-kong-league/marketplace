@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-import json
 import pytest
 from brownie.network.account import Account
 from brownie.test import strategy
@@ -10,43 +8,14 @@ from typing import DefaultDict, Dict, List, Tuple, Optional, TypeVar
 from collections import defaultdict
 from random import randint
 
+from libs.utils import *
+from libs.adaptors import *
+
 T = TypeVar("T")
 K = TypeVar("K")
 V = TypeVar("V")
 
 TO_ANYONE = ZERO_ADDRESS
-
-
-def pr_red(skk):
-    print("\033[91m {}\033[00m".format(skk))
-
-
-def pr_green(skk):
-    print("\033[92m {}\033[00m".format(skk))
-
-
-def pr_yellow(skk):
-    print("\033[93m {}\033[00m".format(skk))
-
-
-def pr_light_purple(skk):
-    print("\033[94m {}\033[00m".format(skk))
-
-
-def pr_purple(skk):
-    print("\033[95m {}\033[00m".format(skk))
-
-
-def pr_cyan(skk):
-    print("\033[96m {}\033[00m".format(skk))
-
-
-def pr_light_gray(skk):
-    print("\033[97m {}\033[00m".format(skk))
-
-
-def pr_black(skk):
-    print("\033[98m {}\033[00m".format(skk))
 
 
 class Accounts:
@@ -66,70 +35,6 @@ def shared_setup(fn_isolation):
 def A():
     a = Accounts(accounts)
     return a
-
-
-@dataclass(frozen=True)
-class NFT:
-    address: Account
-    token_id: int
-
-    def __repr__(self) -> str:
-        s = json.dumps(
-            {"address": self.address.address.lower(), "tokenID": self.token_id}
-        )
-        return f"NFT({s})"
-
-
-# TODO: to should be an Account as well
-@dataclass(frozen=True)
-class Ask:
-    exists: bool
-    nft: NFT
-    seller: Account
-    price: int
-    to: str
-
-    def __repr__(self) -> str:
-        s = json.dumps(
-            {
-                "exists": self.exists,
-                "nft": str(self.nft),
-                "seller": self.seller.address.lower(),
-                "price": self.price,
-                "to": self.to,
-            },
-            indent=2,
-        )
-        return f"Ask(\n{s}\n)"
-
-    @classmethod
-    def from_raw(cls, exists: bool, seller: str, price: int, to: str):
-        return cls(exists, Account(seller), price, to)
-
-
-@dataclass(frozen=True)
-class Bid:
-    exists: bool
-    nft: NFT
-    buyer: Account
-    price: int
-
-    def __repr__(self) -> str:
-        s = json.dumps(
-            {
-                "exists": self.exists,
-                "nft": str(self.nft),
-                "buyer": self.buyer.address.lower(),
-                "price": self.price,
-            },
-            indent=2,
-        )
-        return f"Bid(\n{s}\n)"
-
-    @classmethod
-    def from_contract(cls, exists: bool, buyer: str, price: int):
-        return cls(exists, Account(buyer), price)
-
 
 TokenID = int
 WithdrawableBalance = int
