@@ -7,8 +7,6 @@ RUN mkdir /marketplace && \
 
 RUN pip install poetry
 
-COPY /dockerfs/shell-entrypoint.sh /entrypoint.sh
-
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - \
     && apt-get update \
     && apt-get install -y nodejs \
@@ -17,5 +15,6 @@ RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - \
 RUN npm install -g ganache-cli
 
 WORKDIR /marketplace
+COPY /dockerfs/shell-entrypoint.sh /entrypoint.sh
 
 CMD ["/entrypoint.sh"]
