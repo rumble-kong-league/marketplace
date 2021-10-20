@@ -31,7 +31,7 @@ RUN pip install -r requirements.txt \
 
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash - \
     && apt-get update \
-    && apt-get install nodejs \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 RUN npm install -g ganache-cli
