@@ -7,3 +7,5 @@ cd /marketplace/contracts
 poetry run brownie compile --all
 
 cd /marketplace
+
+poetry shell
