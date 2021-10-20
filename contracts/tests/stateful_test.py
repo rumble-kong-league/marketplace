@@ -5,8 +5,7 @@ from brownie.network.account import Account
 from brownie.test import strategy
 from brownie import accounts, Marketplace, E721, E1155, ZERO_ADDRESS, reverts
 
-# todo: look at brownie and hypothesis. See how this can be added
-# from hypothesis.stateful import precondition
+from hypothesis.stateful import precondition
 from typing import DefaultDict, Dict, List, Tuple, Optional, TypeVar
 from collections import defaultdict
 from random import randint
@@ -215,7 +214,7 @@ class StateMachine:
 
         pr_yellow(f"{ask}")
 
-    # @precondition(lambda self: True == True)
+    @precondition(lambda _: True == True)
     def rule_cancel_ask(self, st_price):
         if not self.there_is_at_least_one_ask():
             self.rule_ask(st_price)
@@ -231,7 +230,7 @@ class StateMachine:
             f"cancelled ask. token_id={ask.nft.token_id},addr={ask.nft.address.address.lower()}"
         )
 
-    # @precondition(lambda self: self.there_is_at_least_one_ask() == True)
+    @precondition(lambda _: True == True)
     def rule_accept_ask(self):
         pr_yellow("accepted ask")
 
@@ -256,7 +255,7 @@ class StateMachine:
                 with reverts(self.marketplace.REVERT_BID_TOO_LOW()):
                     self.marketplace.bid(*bid_args)
 
-    # @precondition(lambda self: self.there_is_at_least_one_bid() == True)
+    @precondition(lambda _: True == True)
     def rule_cancel_bid(self, st_price):
         if not self.there_is_at_least_one_bid():
             self.rule_bid(st_price)
@@ -271,15 +270,15 @@ class StateMachine:
             f"cancelled bid. token_id={bid.nft.token_id},addr={bid.nft.address.address.lower()}"
         )
 
-    # @precondition(lambda self: self.there_is_at_least_one_bid() == True)
+    @precondition(lambda _: True == True)
     def rule_accept_bid(self):
         pr_light_purple("accepted bid")
 
-    # @precondition(lambda self: self.there_is_at_least_one_ask() == True)
+    @precondition(lambda _: True == True)
     def rule_transfer_has_ask(self):
         pr_cyan("transferred")
 
-    # @precondition(lambda self: self.there_is_at_least_one_bid() == True)
+    @precondition(lambda _: True == True)
     def rule_transfer_has_bid_to(self):
         pr_cyan("transferred")
 
