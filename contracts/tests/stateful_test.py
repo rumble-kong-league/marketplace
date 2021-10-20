@@ -9,7 +9,7 @@ from collections import defaultdict
 from random import randint
 
 from libs.utils import *
-from libs.adaptors import *
+from libs.adaptors import NFT, Ask, Bid
 
 T = TypeVar("T")
 K = TypeVar("K")
@@ -198,6 +198,8 @@ class StateMachine:
             if len(nfts) > 0:
                 return (holder, nfts[0])
 
+        return Account(ZERO_ADDRESS), NFT(ZERO_ADDRESS, 0)
+
     def find_bidder(self) -> Tuple[Account, NFT]:
         """
         Finds the account from which we can bid, and also find an NFT on which to bid
@@ -312,7 +314,7 @@ class StateMachine:
 
             for token_id in range(total_supply):
                 _order = contract_func(nft.address, token_id)
-                order = None
+                order: Union[Ask, Bid]
                 if _order[0] == True:
                     nft = NFT(nft.address, token_id)
 
@@ -330,10 +332,10 @@ class StateMachine:
 
         return orders
 
-    def contract_asks(self) -> List[Ask]:
+    def contract_asks(self) -> Set[Union[Ask, Bid]]:
         return self._contract_orders(ask_request=True, bid_request=False)
 
-    def contract_bids(self) -> List[Bid]:
+    def contract_bids(self) -> Set[Union[Ask, Bid]]:
         return self._contract_orders(ask_request=False, bid_request=True)
 
     def assert_equal_to_one(item: T, others: List[T]) -> None:
@@ -342,7 +344,7 @@ class StateMachine:
                 return
         assert False
 
-    def flatten_dict(self, d: Dict[K, V]) -> List[V]:
+    def flatten_dict(self, d: Dict[K, List[V]]) -> List[V]:
         vs: List[V] = []
         for k in d.keys():
             vs = vs + d[k]
@@ -378,6 +380,7 @@ class StateMachine:
         for _, asks in self.asks.items():
             if len(asks) > 0:
                 return asks[0]
+        return None
 
 
 def test_stateful(state_machine, A):

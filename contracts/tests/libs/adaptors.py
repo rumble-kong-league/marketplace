@@ -37,10 +37,6 @@ class Ask:
         )
         return f"Ask(\n{s}\n)"
 
-    @classmethod
-    def from_raw(cls, exists: bool, seller: str, price: int, to: str):
-        return cls(exists, Account(seller), price, to)
-
 
 @dataclass(frozen=True)
 class Bid:
@@ -60,7 +56,3 @@ class Bid:
             indent=2,
         )
         return f"Bid(\n{s}\n)"
-
-    @classmethod
-    def from_contract(cls, exists: bool, buyer: str, price: int):
-        return cls(exists, Account(buyer), price)
