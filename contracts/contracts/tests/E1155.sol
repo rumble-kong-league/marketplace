@@ -8,9 +8,13 @@ contract E1155 is ERC1155 {
 
     constructor() ERC1155("lfg://rumble.kongs/{id}.json") {}
 
-    function faucet() public {
+    function faucet() external {
         tokenId++;
         _mint(msg.sender, tokenId, 10, "");
+    }
+
+    function totalSupply() external view returns (uint256) {
+        return tokenId;
     }
 }
 
