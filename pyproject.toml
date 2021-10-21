@@ -1,19 +1,19 @@
 [tool.poetry]
-name = "marketplace"
-version = "0.1.0"
+name        = "marketplace"
+version     = "0.1.0"
 description = ""
-authors = ["nazariyv <nazariy@inbox.ru>"]
-license = "MIT"
+authors     = ["nazariyv <nazariy@inbox.ru>"]
+license     = "MIT"
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.10"
+python      = ">=3.9,<3.10"
 
 [tool.poetry.dev-dependencies]
-black = "^21.9b0"
+black       = "^21.9b0"
 eth-brownie = "^1.17.0"
 pytest = "^6.2.5"
 mypy = "^0.910"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires      = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
