@@ -82,21 +82,12 @@ class StateMachine:
 
         contract_bids = self.contract_bids()
         contract_asks = self.contract_asks()
+
         state_bids = self.flatten_dict(self.bids)
         state_asks = self.flatten_dict(self.asks)
 
-        assert len(contract_bids) == len(state_bids)
-        assert len(contract_asks) == len(state_asks)
-
-        # todo: set equality
-        map(
-            lambda bid: self.assert_equal_to_one(bid, state_bids),
-            contract_bids,
-        )
-        map(
-            lambda ask: self.assert_equal_to_one(ask, state_asks),
-            contract_asks,
-        )
+        assert state_bids == contract_bids
+        assert state_asks == contract_asks
 
         pr_purple("invariant")
 
@@ -328,12 +319,6 @@ class StateMachine:
 
     def contract_bids(self) -> Set[Union[Ask, Bid]]:
         return self._contract_orders(is_ask_request=False)
-
-    def assert_equal_to_one(self, item: T, others: List[T]) -> None:
-        for _item in others:
-            if item == _item:
-                return
-        assert False
 
     def flatten_dict(self, d: Dict[K, List[V]]) -> Set[V]:
         """
