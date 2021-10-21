@@ -1,7 +1,7 @@
 import pytest
-from brownie.network.account import Account # type: ignore
-from brownie.test import strategy # type: ignore
-from brownie import accounts, Marketplace, E721, E1155, ZERO_ADDRESS, reverts # type: ignore
+from brownie.network.account import Account  # type: ignore
+from brownie.test import strategy  # type: ignore
+from brownie import accounts, Marketplace, E721, E1155, ZERO_ADDRESS, reverts  # type: ignore
 
 from hypothesis.stateful import precondition
 from typing import DefaultDict, Dict, List, Tuple, Optional, TypeVar, Set, Union
@@ -278,6 +278,7 @@ class StateMachine:
             _ask for _ix, _ask in enumerate(self.asks[ask.seller]) if _ix != ix
         ]
 
+    # todo: remove_bid and remove_ask are similar, not DRY
     def remove_bid(self, bid: Bid) -> None:
 
         ix = -1
@@ -294,18 +295,11 @@ class StateMachine:
             _bid for _ix, _bid in enumerate(self.bids[bid.buyer]) if _ix != ix
         ]
 
-    def _contract_orders(
-        self, *, ask_request: bool, bid_request: bool
-    ) -> Set[Union[Ask, Bid]]:
-        if ask_request == False and bid_request == False:
-            raise Exception("invalid")
-        if ask_request == True and bid_request == True:
-            raise Exception("invalid")
-
+    def _contract_orders(self, *, is_ask_request: bool) -> Set[Union[Ask, Bid]]:
         orders: Set[Union[Ask, Bid]] = set()
 
         contract_func = (
-            self.marketplace.asks if ask_request == True else self.marketplace.bids
+            self.marketplace.asks if is_ask_request == True else self.marketplace.bids
         )
 
         for nft in [self.e7, self.e1]:
@@ -315,28 +309,25 @@ class StateMachine:
             for token_id in range(total_supply):
                 _order = contract_func(nft.address, token_id)
                 order: Union[Ask, Bid]
-                if _order[0] == True:
+                if _order[0]:
                     nft = NFT(nft.address, token_id)
-
-                    if ask_request == True:
+                    if is_ask_request:
                         # todo: _order[3] should be an Account
                         order = Ask(
                             True, nft, Account(_order[1]), int(_order[2]), _order[3]
                         )
-                    elif bid_request == True:
-                        order = Bid(True, nft, Account(_order[1]), int(_order[2]))
                     else:
-                        raise Exception("unknown")
+                        order = Bid(True, nft, Account(_order[1]), int(_order[2]))
 
                     orders.add(order)
 
         return orders
 
     def contract_asks(self) -> Set[Union[Ask, Bid]]:
-        return self._contract_orders(ask_request=True, bid_request=False)
+        return self._contract_orders(is_ask_request=True)
 
     def contract_bids(self) -> Set[Union[Ask, Bid]]:
-        return self._contract_orders(ask_request=False, bid_request=True)
+        return self._contract_orders(is_ask_request=False)
 
     def assert_equal_to_one(self, item: T, others: List[T]) -> None:
         for _item in others:
@@ -344,33 +335,33 @@ class StateMachine:
                 return
         assert False
 
-    def flatten_dict(self, d: Dict[K, List[V]]) -> List[V]:
-        vs: List[V] = []
-        for k in d.keys():
-            vs = vs + d[k]
-        return vs
+    def flatten_dict(self, d: Dict[K, List[V]]) -> Set[V]:
+        """
+        Double set comprehension allows us to flatten a dict whose values are lists of
+        values.
 
-    def _get_first_order(self, *, ask_request: bool, bid_request: bool) -> Optional[Union[Ask, Bid]]:
-      if ask_request == True and bid_request == True:
-        raise Exception("invalid")
-      if ask_request == False and bid_request == False:
-        raise Exception("invalid")
+        Same as:
+        x = set()
+        for v in d.values():
+            for x in v:
+                set.add(x)
+        """
+        return {x for v in d.values() for x in v}
 
-      order: Optional[Union[Ask, Bid]] = None
-      accs_orders = self.asks if ask_request == True else self.bids
+    def _get_first_order(self, *, is_ask_request: bool) -> Optional[Union[Ask, Bid]]:
+        accs_orders = self.asks if is_ask_request == True else self.bids
 
-      for _, orders in accs_orders.items(): # type: ignore
-        if len(orders) > 0:
-          order = orders[0]
-          return order
+        for orders in accs_orders.values():  # type: ignore
+            if len(orders) > 0:
+                return orders[0]
 
-      return order
+        return None
 
     def get_bid(self) -> Optional[Bid]:
-        return self._get_first_order(ask_request=False, bid_request=True) # type: ignore
+        return self._get_first_order(is_ask_request=False)  # type: ignore
 
     def get_ask(self) -> Optional[Ask]:
-        return self._get_first_order(ask_request=True, bid_request=False) # type: ignore
+        return self._get_first_order(is_ask_request=True)  # type: ignore
 
 
 def test_stateful(state_machine, A):
