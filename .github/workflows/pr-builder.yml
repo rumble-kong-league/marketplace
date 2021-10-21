@@ -6,6 +6,7 @@ name: Pull Request Builder
 on:
   pull_request:
     branches:
+      - main
       - master
 
 jobs:
