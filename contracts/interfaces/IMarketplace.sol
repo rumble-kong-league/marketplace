@@ -50,19 +50,25 @@ interface IMarketplace {
     // ===============================================================
 
     function ask(
-        INFTContract nft,
-        uint256 tokenID,
-        uint256 price,
-        address to
+        INFTContract[] calldata nft,
+        uint256[] calldata tokenID,
+        uint256[] calldata price,
+        address[] calldata to
     ) external;
 
-    function bid(INFTContract nft, uint256 tokenID) external payable;
+    function bid(
+        INFTContract[] calldata nft,
+        uint256[] calldata tokenID,
+        uint256[] calldata price
+    ) external payable;
 
     // ======= CANCEL ASK OR BID =====================================
 
-    function cancelAsk(INFTContract nft, uint256 tokenID) external;
+    function cancelAsk(INFTContract[] calldata nft, uint256[] calldata tokenID)
+        external;
 
-    function cancelBid(INFTContract nft, uint256 tokenID) external;
+    function cancelBid(INFTContract[] calldata nft, uint256[] calldata tokenID)
+        external;
 
     /**
      * @dev Seller placed ask, you are fine with the terms. You accept their

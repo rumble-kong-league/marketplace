@@ -20,15 +20,6 @@ contract Marketplace is IMarketplace {
     mapping(address => mapping(uint256 => Bid)) public bids;
     mapping(address => uint256) public escrow;
 
-    // to avoid extra gas that comes with storing signatures on-chain, they have to be stored in a db
-    // this means that we require redundancy and replication across our cloud servers. Different zones
-    // would be ideal
-    // 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9
-    bytes32 public immutable ASK_TYPEHASH =
-        keccak256(
-            "Ask(address nft,uint256 tokenID,uint256 price,address to,uint256 nonce,uint256 deadline)"
-        );
-
     // ================
 
     string public constant REVERT_NOT_OWNER_OF_TOKEN_ID =
@@ -38,6 +29,8 @@ contract Marketplace is IMarketplace {
     string public constant REVERT_BID_TOO_LOW = "Marketplace::bid too low";
     string public constant REVERT_NOT_A_CREATOR_OF_BID =
         "Marketplace::not a creator of the bid";
+    string public constant REVERT_NOT_A_CREATOR_OF_ASK =
+        "Marketplace::not a creator of the ask";
     string public constant REVERT_ASK_DOES_NOT_EXIST =
         "Marketplace::ask does not exist";
     string public constant REVERT_CANT_ACCEPT_OWN_ASK =
@@ -61,30 +54,37 @@ contract Marketplace is IMarketplace {
     // isn't a bad scenario.
 
     function ask(
-        INFTContract nft,
-        uint256 tokenID,
-        uint256 price,
-        address to
+        INFTContract[] calldata nft,
+        uint256[] calldata tokenID,
+        uint256[] calldata price,
+        address[] calldata to
     ) external override {
-        require(
-            nft.quantityOf(msg.sender, tokenID) > 0,
-            REVERT_NOT_OWNER_OF_TOKEN_ID
-        );
+        // todo: revert messages
+        require(nft.length == tokenID.length, "");
+        require(tokenID.length == price.length, "");
+        require(price.length == to.length, "");
 
-        // overwristes or creates a new one
-        asks[address(nft)][tokenID] = Ask({
-            exists: true,
-            seller: msg.sender,
-            price: price,
-            to: to
-        });
+        for (uint256 i = 0; i < nft.length; i++) {
+            require(
+                nft[i].quantityOf(msg.sender, tokenID[i]) > 0,
+                REVERT_NOT_OWNER_OF_TOKEN_ID
+            );
 
-        emit AskCreated({
-            nft: address(nft),
-            tokenID: tokenID,
-            price: price,
-            to: to
-        });
+            // overwristes or creates a new one
+            asks[address(nft[i])][tokenID[i]] = Ask({
+                exists: true,
+                seller: msg.sender,
+                price: price[i],
+                to: to[i]
+            });
+
+            emit AskCreated({
+                nft: address(nft[i]),
+                tokenID: tokenID[i],
+                price: price[i],
+                to: to[i]
+            });
+        }
     }
 
     // what happens if you do bid on an NFT that is in zero address
@@ -98,61 +98,94 @@ contract Marketplace is IMarketplace {
     //        that hold that qty of 1155 or more.
     // Therefore, it is not a problem if zero address has some quantity of 1155
 
-    function bid(INFTContract nft, uint256 tokenID) external payable override {
-        address nftAddress = address(nft);
-        // ! this will disallow bidding on 1155s that you already hold. Is this desired?
-        // ! can this be ignored and agents be allowed to bid on what they have?
-        // require(
-        //     nft.quantityOf(msg.sender, tokenID) == 0,
-        //     REVERT_OWNER_OF_TOKEN_ID
-        // );
-        // require bid larger than existing bid or 0 (if exists or doesn't)
-        require(
-            msg.value > bids[nftAddress][tokenID].price,
-            REVERT_BID_TOO_LOW
-        );
+    function bid(
+        INFTContract[] calldata nft,
+        uint256[] calldata tokenID,
+        uint256[] calldata price
+    ) external payable override {
+        // todo: error strings
+        require(nft.length == tokenID.length, "");
+        require(tokenID.length == price.length, "");
 
-        // if bid existed, let the prev. creator withdraw their bid. new overwrites
-        if (bids[nftAddress][tokenID].exists) {
-            escrow[bids[nftAddress][tokenID].buyer] += bids[nftAddress][tokenID]
-                .price;
+        uint256 totalPrice = 0;
+
+        for (uint256 i = 0; i < nft.length; i++) {
+            address nftAddress = address(nft[i]);
+            // bidding on own NFTs is possible. But then again, even if we wanted to disallow it,
+            // it would not be an effective mechanism, since the agent can bid from his other
+            // wallets
+            require(
+                msg.value > bids[nftAddress][tokenID[i]].price,
+                REVERT_BID_TOO_LOW
+            );
+
+            // if bid existed, let the prev. creator withdraw their bid. new overwrites
+            if (bids[nftAddress][tokenID[i]].exists) {
+                escrow[bids[nftAddress][tokenID[i]].buyer] += bids[nftAddress][
+                    tokenID[i]
+                ].price;
+            }
+
+            // overwristes or creates a new one
+            bids[nftAddress][tokenID[i]] = Bid({
+                exists: true,
+                buyer: msg.sender,
+                price: price[i]
+            });
+
+            emit BidCreated({
+                nft: nftAddress,
+                tokenID: tokenID[i],
+                price: price[i]
+            });
+
+            totalPrice += price[i];
         }
 
-        // overwristes or creates a new one
-        bids[nftAddress][tokenID] = Bid({
-            exists: true,
-            buyer: msg.sender,
-            price: msg.value
-        });
-
-        emit BidCreated({nft: nftAddress, tokenID: tokenID, price: msg.value});
+        // todo: error strings
+        require(totalPrice == msg.value, "");
     }
 
     // ======= CANCEL ASK OR BID =====================================
 
-    function cancelAsk(INFTContract nft, uint256 tokenID) external override {
-        require(
-            nft.quantityOf(msg.sender, tokenID) > 0,
-            REVERT_NOT_OWNER_OF_TOKEN_ID
-        );
+    function cancelAsk(INFTContract[] calldata nft, uint256[] calldata tokenID)
+        external
+        override
+    {
+        require(nft.length == tokenID.length, "");
 
-        delete asks[address(nft)][tokenID];
+        for (uint256 i = 0; i < nft.length; i++) {
+            address nftAddress = address(nft[i]);
+            require(
+                asks[nftAddress][tokenID[i]].seller == msg.sender,
+                REVERT_NOT_A_CREATOR_OF_ASK
+            );
 
-        emit AskDeleted({nft: address(nft), tokenID: tokenID});
+            delete asks[nftAddress][tokenID[i]];
+
+            emit AskDeleted({nft: nftAddress, tokenID: tokenID[i]});
+        }
     }
 
-    function cancelBid(INFTContract nft, uint256 tokenID) external override {
-        address nftAddress = address(nft);
-        require(
-            bids[nftAddress][tokenID].buyer == msg.sender,
-            REVERT_NOT_A_CREATOR_OF_BID
-        );
+    function cancelBid(INFTContract[] calldata nft, uint256[] calldata tokenID)
+        external
+        override
+    {
+        require(nft.length == tokenID.length, "");
 
-        escrow[msg.sender] += bids[nftAddress][tokenID].price;
+        for (uint256 i = 0; i < nft.length; i++) {
+            address nftAddress = address(nft[i]);
+            require(
+                bids[nftAddress][tokenID[i]].buyer == msg.sender,
+                REVERT_NOT_A_CREATOR_OF_BID
+            );
 
-        delete bids[nftAddress][tokenID];
+            escrow[msg.sender] += bids[nftAddress][tokenID[i]].price;
 
-        emit BidDeleted({nft: nftAddress, tokenID: tokenID});
+            delete bids[nftAddress][tokenID[i]];
+
+            emit BidDeleted({nft: nftAddress, tokenID: tokenID[i]});
+        }
     }
 
     // ======= ACCEPT ASK OR BID =====================================

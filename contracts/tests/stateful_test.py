@@ -97,10 +97,10 @@ class StateMachine:
 
         ask = Ask(True, nft, asker, price, Account(TO_ANYONE))
         self.marketplace.ask(
-            ask.nft.address,
-            ask.nft.token_id,
-            ask.price,
-            ask.to,
+            [ask.nft.address],
+            [ask.nft.token_id],
+            [ask.price],
+            [ask.to],
             {"from": ask.seller},
         )
         self.update_asks(ask)
@@ -114,7 +114,7 @@ class StateMachine:
 
         ask = self.get_ask()
         self.marketplace.cancelAsk(
-            ask.nft.address, ask.nft.token_id, {"from": ask.seller}
+            [ask.nft.address], [ask.nft.token_id], {"from": ask.seller}
         )
         self.remove_ask(ask)
 
@@ -132,8 +132,9 @@ class StateMachine:
         bid = Bid(True, nft, bidder, price)
         existing_bid = self.find_existing_bid(nft)
         bid_args = [
-            bid.nft.address,
-            bid.nft.token_id,
+            [bid.nft.address],
+            [bid.nft.token_id],
+            [bid.price],
             {"from": bid.buyer, "value": bid.price},
         ]
 
@@ -153,7 +154,7 @@ class StateMachine:
 
         bid = self.get_bid()
         self.marketplace.cancelBid(
-            bid.nft.address, bid.nft.token_id, {"from": bid.buyer}
+            [bid.nft.address], [bid.nft.token_id], {"from": bid.buyer}
         )
         self.remove_bid(bid)
 
