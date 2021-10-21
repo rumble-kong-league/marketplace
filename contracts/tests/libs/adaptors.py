@@ -15,14 +15,13 @@ class NFT:
         return f"NFT({s})"
 
 
-# TODO: to should be an Account as well
 @dataclass(frozen=True)
 class Ask:
     exists: bool
     nft: NFT
     seller: Account
     price: int
-    to: str
+    to: Account
 
     def __repr__(self) -> str:
         s = json.dumps(
@@ -31,7 +30,7 @@ class Ask:
                 "nft": str(self.nft),
                 "seller": self.seller.address.lower(),
                 "price": self.price,
-                "to": self.to,
+                "to": self.to.address.lower(),
             },
             indent=2,
         )
