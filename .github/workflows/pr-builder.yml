@@ -1,0 +1,39 @@
+name: Pull Request Builder
+# TODO
+# * change `1.1.11` to input variable
+# * change open zepplin and brownie packages to variable
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9']
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+    - run: |
+        pip install poetry==1.1.11
+      shell: bash
+    - run: |
+        poetry update
+      shell: bash
+    - run: |
+        poetry run brownie pm install OpenZeppelin/openzeppelin-contracts@4.3.0
+      shell: bash
+    - run: |
+        poetry run brownie compile --all
+      working-directory: ./contracts
+      shell: bash
+    - run: |
+        poetry run brownie test
+      working-directory: ./contracts
+      shell: bash
+
