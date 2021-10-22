@@ -1,7 +1,4 @@
-name: Pull Request Builder
-# TODO
-# * change `1.1.11` to input variable
-# * change open zepplin and brownie packages to variable
+name: Publish Release (manual)
 
 on:
   workflow_dispatch:
