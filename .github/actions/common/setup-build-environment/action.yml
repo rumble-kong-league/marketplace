@@ -19,6 +19,7 @@ runs:
       shell: bash
     - run: |
         npm install -g ganache-cli
+      shell: bash
     - run: |
         poetry update
       shell: bash
