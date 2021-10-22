@@ -1,0 +1,32 @@
+name: Pull Request Builder
+# TODO
+# * change `1.1.11` to input variable
+# * change open zepplin and brownie packages to variable
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python_version: ['3.9']
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/common/setup-build-environment
+      with:
+        python_version: ${{ matrix.python_version }}
+    - name: Get Project Version
+      id: version
+      run: echo "::set-output name=version::$(cat pyproject.toml| grep version| awk -F'"' {'print $$2'})"
+    - name: Create Project Release
+      id: project-release
+      uses: actions/create-release@latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.date.outputs.date }}
+        release_name: v${{ steps.date.outputs.date }}
+        draft: false
+        prerelease: false
