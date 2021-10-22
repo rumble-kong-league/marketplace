@@ -16,7 +16,7 @@ jobs:
         python_version: ${{ matrix.python_version }}
     - name: Get Project Version
       id: version
-      run: echo "::set-output name=version::$(cat pyproject.toml| grep version| awk -F'"' {'print $$2'})"
+      run: echo "::set-output name=version::$(cat pyproject.toml| grep version| awk -F'"' {'print $2'})"
     - name: Create Project Release
       id: project-release
       uses: actions/create-release@latest
