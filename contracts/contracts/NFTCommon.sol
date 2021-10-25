@@ -38,6 +38,61 @@ library NFTCommon {
     }
 
     /**
+     @notice Transfers the NFT tokenID from to.
+     @dev safuTransferFrom name to avoid collision with the interface signature definitions. The reason it is implemented the way it is,
+      is because some NFT contracts implement both the 721 and 1155 standard at the same time. Sometimes, 721 or 1155 function does not work.
+      So instead of relying on the user's input, or asking the contract what interface it implements, it is best to just make a good assumption
+      about what NFT type it is (here we guess it is 721 first), and if that fails, we use the 1155 function to tranfer the NFT.
+     @param nft     NFT address
+     @param from    Source address
+     @param to      Target address
+     @param tokenID ID of the token type
+     @param data    Additional data with no specified format, MUST be sent unaltered in call to `onERC1155Received` on `_to`
+    */
+    function safeTransferFrom_(
+        INFTContract nft,
+        address from,
+        address to,
+        uint256[] memory tokenID,
+        bytes memory data
+    ) internal returns (bool) {
+        // if only a single tokenID needs sending
+        if (tokenID.length == 1) {
+            // most are 721s, so we assume that that is what the NFT type is
+            try nft.safeTransferFrom(from, to, tokenID[0], data) {
+                return true;
+                // on fail, use 1155s format
+            } catch (bytes memory) {
+                try nft.safeTransferFrom(from, to, tokenID[0], 1, data) {
+                    return true;
+                } catch (bytes memory) {
+                    return false;
+                }
+            }
+            // this is a 1155
+        } else {
+            // supporting multiple amounts (qty > 1) would complicate the contracts
+            // too much. First of all, we would either need to (i) start assigning the ids
+            // to asks (since the same nft - tokenID combination could have different params),
+            // or (ii) use the quantity as part of the path to the Ask in storage, which is
+            // suboptimal. The path would look like asks[nftAddress][tokenID][qty]. This would
+            // also highly complicate the tests. There are other issues with such a design,
+            // for that reason, only unit quantity is allowed. It will be possible to make
+            // the contract upgradeable, such that if new patterns are discovered or new
+            // compiler features introduced, we can meaningfully implement it.
+            uint256[] memory amount = new uint256[](tokenID.length);
+            for (uint256 i = 0; i < tokenID.length; i++) {
+                amount[i] = 1;
+            }
+            try nft.safeBatchTransferFrom(from, to, tokenID, amount, data) {
+                return true;
+            } catch (bytes memory) {
+                return false;
+            }
+        }
+    }
+
+    /**
      @notice Determines if potentialOwner is in fact an owner of at least 1 qty of NFT token ID.
      @param nft NFT address
      @param potentialOwner suspected owner of the NFT token ID
@@ -48,7 +103,7 @@ library NFTCommon {
         INFTContract nft,
         address potentialOwner,
         uint256 tokenID
-    ) internal returns (uint256) {
+    ) internal view returns (uint256) {
         try nft.ownerOf(tokenID) returns (address owner) {
             if (owner == potentialOwner) {
                 return 1;
