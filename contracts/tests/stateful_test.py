@@ -188,7 +188,7 @@ class StateMachine:
             if len(nfts) > 0:
                 return (holder, next(iter(nfts)))
 
-        return Account(ZERO_ADDRESS), NFT(ZERO_ADDRESS, 0)
+        return Account(ZERO_ADDRESS), NFT(Account(ZERO_ADDRESS), 0)
 
     # returns bidder and an NFT on which to bid
     def find_bidder(self) -> Tuple[Account, NFT]:
@@ -310,7 +310,7 @@ class StateMachine:
                 _order = contract_func(nft.address, token_id)
                 order: Union[Ask, Bid]
                 if _order[0]:
-                    nft = NFT(nft.address, token_id)
+                    nft = NFT(Account(nft.address), token_id)
                     if is_ask_request:
                         order = Ask(
                             True,
