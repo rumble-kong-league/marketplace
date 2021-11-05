@@ -266,6 +266,8 @@ class StateMachine:
         self._update_order(bid)
 
     def _remove_order(self, order: Union[Ask, Bid]) -> None:
+        # breakpoint()
+
         agents_orders = set()
         is_ask_request = isinstance(order, Ask)
 
@@ -273,14 +275,7 @@ class StateMachine:
             self.asks[order.seller] if is_ask_request else self.bids[order.buyer]
         )
 
-        updated_orders = set(
-            _order
-            for _order in agents_orders
-            if (
-                _order.nft.token_id != order.nft.token_id
-                and _order.nft.address != order.nft.address
-            )
-        )
+        updated_orders = set(_order for _order in agents_orders if _order != order)
 
         if is_ask_request:
             self.asks[order.seller] = updated_orders
