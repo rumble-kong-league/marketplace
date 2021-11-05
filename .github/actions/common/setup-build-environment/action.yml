@@ -1,0 +1,38 @@
+name: Setup Build Environment
+description: Setup Python/Brownie/NodeJS Development Environment for PR/Build Tasks
+inputs:
+  python_version:
+    description: Version of Python to Install
+    required: true
+  poetry_version:
+    description: Version of Poetry to Install
+    required: false
+    default: 1.1.11
+  openzeppelin_version:
+    description: Version of OpenZeppelin Contracts to Install
+    default: 4.3.0
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v2
+      with:
+        python-version: ${{ inputs.python_version }}
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14'
+    - run: |
+        pip install poetry==${{ inputs.poetry_version }}
+      shell: bash
+    - run: |
+        npm install -g ganache-cli
+      shell: bash
+    - run: |
+        poetry update
+      shell: bash
+    - run: |
+        poetry run brownie pm install OpenZeppelin/openzeppelin-contracts@${{ inputs.openzeppelin_version }}
+      shell: bash
+    - run: |
+        poetry run brownie compile --all
+      working-directory: ./contracts
+      shell: bash

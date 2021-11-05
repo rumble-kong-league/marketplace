@@ -10,9 +10,7 @@ RUN pip install poetry
 COPY / /marketplace
 WORKDIR /marketplace
 
-RUN poetry export -f requirements.txt --without-hashes -o /tmp/requirements.txt
-
-CMD ["/root/.poetry/bin/poetry shell"]
+RUN poetry export -f requirements.txt --dev --without-hashes -o /tmp/requirements.txt
 
 FROM python:3.9-slim-buster
 

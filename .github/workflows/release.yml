@@ -1,0 +1,30 @@
+name: Publish Release (manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python_version: ['3.9']
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ./.github/actions/common/setup-build-environment
+      with:
+        python_version: ${{ matrix.python_version }}
+    - name: Get Project Version
+      id: version
+      run: echo ::set-output name=version::$(poetry version --short)
+      shell: bash
+    - name: Create Project Release
+      id: project-release
+      uses: actions/create-release@latest
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.version.outputs.version }}
+        release_name: v${{ steps.version.outputs.version }}
+        draft: false
+        prerelease: false
