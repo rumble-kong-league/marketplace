@@ -42,6 +42,8 @@ contract Marketplace is IMarketplace {
     string public constant REVERT_ASK_SELLER_NOT_OWNER =
         "Marketplace::ask creator not owner";
     string public constant REVERT_NFT_NOT_SENT = "Marketplace::NFT not sent";
+    string public constant REVERT_INSUFFICIENT_ETHER =
+        "Marketplace::insufficient ether sent";
 
     // ======= CREATE ASK OR BID =====================================
 
@@ -59,11 +61,6 @@ contract Marketplace is IMarketplace {
         uint256[] calldata price,
         address[] calldata to
     ) external override {
-        // todo: revert messages
-        require(nft.length == tokenID.length, "");
-        require(tokenID.length == price.length, "");
-        require(price.length == to.length, "");
-
         for (uint256 i = 0; i < nft.length; i++) {
             require(
                 nft[i].quantityOf(msg.sender, tokenID[i]) > 0,
@@ -103,10 +100,6 @@ contract Marketplace is IMarketplace {
         uint256[] calldata tokenID,
         uint256[] calldata price
     ) external payable override {
-        // todo: error strings
-        require(nft.length == tokenID.length, "");
-        require(tokenID.length == price.length, "");
-
         uint256 totalPrice = 0;
 
         for (uint256 i = 0; i < nft.length; i++) {
@@ -142,8 +135,7 @@ contract Marketplace is IMarketplace {
             totalPrice += price[i];
         }
 
-        // todo: error strings
-        require(totalPrice == msg.value, "");
+        require(totalPrice == msg.value, REVERT_INSUFFICIENT_ETHER);
     }
 
     // ======= CANCEL ASK OR BID =====================================
@@ -152,8 +144,6 @@ contract Marketplace is IMarketplace {
         external
         override
     {
-        require(nft.length == tokenID.length, "");
-
         for (uint256 i = 0; i < nft.length; i++) {
             address nftAddress = address(nft[i]);
             require(
@@ -171,8 +161,6 @@ contract Marketplace is IMarketplace {
         external
         override
     {
-        require(nft.length == tokenID.length, "");
-
         for (uint256 i = 0; i < nft.length; i++) {
             address nftAddress = address(nft[i]);
             require(
@@ -195,84 +183,112 @@ contract Marketplace is IMarketplace {
      * ask by sending the required msg.value and indicating the id of the token
      * you are purchasing. There is no outflow like in the acceptBid case, since
      * there is no bid that requires escrow adjusting. See acceptBid's function
-     * body comments for details.
+     * body comments for details. There is no batching, since the seller is
+     * not required to be the same address across all the accepted asks.
      */
-    function acceptAsk(INFTContract nft, uint256 tokenID)
+    function acceptAsk(INFTContract[] calldata nft, uint256[] calldata tokenID)
         external
         payable
         override
     {
-        address nftAddress = address(nft);
+        uint256 totalPrice = 0;
 
-        require(asks[nftAddress][tokenID].exists, REVERT_ASK_DOES_NOT_EXIST);
-        require(
-            asks[nftAddress][tokenID].seller != msg.sender,
-            REVERT_CANT_ACCEPT_OWN_ASK
-        );
-        if (asks[nftAddress][tokenID].to != address(0)) {
+        for (uint256 i = 0; i < nft.length; i++) {
+            address nftAddress = address(nft[i]);
+
             require(
-                asks[nftAddress][tokenID].to == msg.sender,
-                REVERT_ASK_IS_RESERVED
+                asks[nftAddress][tokenID[i]].exists,
+                REVERT_ASK_DOES_NOT_EXIST
             );
+            require(
+                asks[nftAddress][tokenID[i]].seller != msg.sender,
+                REVERT_CANT_ACCEPT_OWN_ASK
+            );
+            if (asks[nftAddress][tokenID[i]].to != address(0)) {
+                require(
+                    asks[nftAddress][tokenID[i]].to == msg.sender,
+                    REVERT_ASK_IS_RESERVED
+                );
+            }
+            require(
+                nft[i].quantityOf(
+                    asks[nftAddress][tokenID[i]].seller,
+                    tokenID[i]
+                ) > 0,
+                REVERT_ASK_SELLER_NOT_OWNER
+            );
+
+            totalPrice += asks[nftAddress][tokenID[i]].price;
+
+            escrow[asks[nftAddress][tokenID[i]].seller] += asks[nftAddress][
+                tokenID[i]
+            ].price;
+
+            // if there is a bid for this tokenID from msg.sender, cancel and refund
+            if (bids[nftAddress][tokenID[i]].buyer == msg.sender) {
+                escrow[bids[nftAddress][tokenID[i]].buyer] += bids[nftAddress][
+                    tokenID[i]
+                ].price;
+                delete bids[nftAddress][tokenID[i]];
+            }
+
+            emit AskAccepted({
+                nft: nftAddress,
+                tokenID: tokenID[i],
+                price: asks[nftAddress][tokenID[i]].price,
+                to: asks[nftAddress][tokenID[i]].to
+            });
+
+            bool success = nft[i].safeTransferFrom_(
+                asks[nftAddress][tokenID[i]].seller,
+                msg.sender,
+                tokenID[i],
+                new bytes(0)
+            );
+            require(success, REVERT_NFT_NOT_SENT);
+
+            delete asks[nftAddress][tokenID[i]];
         }
-        require(
-            msg.value == asks[nftAddress][tokenID].price,
-            REVERT_ASK_INSUFFICIENT_VALUE
-        );
-        require(
-            nft.quantityOf(asks[nftAddress][tokenID].seller, tokenID) > 0,
-            REVERT_ASK_SELLER_NOT_OWNER
-        );
 
-        nft.safeTransferFrom_(
-            asks[nftAddress][tokenID].seller,
-            msg.sender,
-            tokenID,
-            new bytes(0)
-        );
-        escrow[asks[nftAddress][tokenID].seller] += msg.value;
-
-        // if there is a bid for this tokenID from msg.sender, cancel and refund
-        if (bids[nftAddress][tokenID].buyer == msg.sender) {
-            escrow[bids[nftAddress][tokenID].buyer] += bids[nftAddress][tokenID]
-                .price;
-            delete bids[nftAddress][tokenID];
-        }
-
-        emit AskAccepted({
-            nft: nftAddress,
-            tokenID: tokenID,
-            price: asks[nftAddress][tokenID].price,
-            to: asks[nftAddress][tokenID].to
-        });
-
-        delete asks[nftAddress][tokenID];
+        require(totalPrice == msg.value, REVERT_ASK_INSUFFICIENT_VALUE);
     }
 
-    function acceptBid(INFTContract nft, uint256 tokenID) external override {
-        address nftAddress = address(nft);
-        require(
-            nft.quantityOf(msg.sender, tokenID) > 0,
-            REVERT_NOT_OWNER_OF_TOKEN_ID
-        );
+    /**
+     * @dev You are the owner of the NFTs, someone submitted the bids on them.
+     * You accept one or more of these bids. Batching here does not work because
+     * you are sending the NFTs to potentially different addresses.
+     */
+    function acceptBid(INFTContract[] calldata nft, uint256[] calldata tokenID)
+        external
+        override
+    {
+        for (uint256 i = 0; i < nft.length; i++) {
+            require(
+                nft[i].quantityOf(msg.sender, tokenID[i]) > 0,
+                REVERT_NOT_OWNER_OF_TOKEN_ID
+            );
 
-        bool success = nft.safeTransferFrom_(
-            msg.sender,
-            bids[nftAddress][tokenID].buyer,
-            tokenID,
-            new bytes(0)
-        );
-        require(success, REVERT_NFT_NOT_SENT);
-        escrow[msg.sender] += bids[nftAddress][tokenID].price;
+            address nftAddress = address(nft[i]);
 
-        emit BidAccepted({
-            nft: nftAddress,
-            tokenID: tokenID,
-            price: bids[nftAddress][tokenID].price
-        });
+            escrow[msg.sender] += bids[nftAddress][tokenID[i]].price;
 
-        delete asks[nftAddress][tokenID];
-        delete bids[nftAddress][tokenID];
+            emit BidAccepted({
+                nft: nftAddress,
+                tokenID: tokenID[i],
+                price: bids[nftAddress][tokenID[i]].price
+            });
+
+            bool success = nft[i].safeTransferFrom_(
+                msg.sender,
+                bids[nftAddress][tokenID[i]].buyer,
+                tokenID[i],
+                new bytes(0)
+            );
+            require(success, REVERT_NFT_NOT_SENT);
+
+            delete asks[nftAddress][tokenID[i]];
+            delete bids[nftAddress][tokenID[i]];
+        }
     }
 
     function withdraw() external override {

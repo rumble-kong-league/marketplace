@@ -71,7 +71,7 @@ def test_accept_bid_721(setup, A):
         {"from": A.bidder, "value": NFTParams.price},
     )
     setup.e721.setApprovalForAll(setup.marketplace, True, {"from": A.asker})
-    setup.marketplace.acceptBid(setup.e721, NFTParams.token_id, {"from": A.asker})
+    setup.marketplace.acceptBid([setup.e721], [NFTParams.token_id], {"from": A.asker})
 
     assert setup.e721.ownerOf(NFTParams.token_id) == A.bidder
     assert setup.marketplace.escrow(A.asker) == NFTParams.price
@@ -90,7 +90,7 @@ def test_accept_bid_1155(setup, A):
         {"from": A.bidder, "value": NFTParams.price},
     )
     setup.e1155.setApprovalForAll(setup.marketplace, True, {"from": A.asker})
-    setup.marketplace.acceptBid(setup.e1155, NFTParams.token_id, {"from": A.asker})
+    setup.marketplace.acceptBid([setup.e1155], [NFTParams.token_id], {"from": A.asker})
 
     assert setup.e1155.balanceOf(A.asker, NFTParams.token_id) == 9
     assert setup.e1155.balanceOf(A.bidder, NFTParams.token_id) == 1
@@ -112,7 +112,7 @@ def test_accept_ask_721(setup, A):
     )
     setup.e721.setApprovalForAll(setup.marketplace, True, {"from": A.asker})
     setup.marketplace.acceptAsk(
-        setup.e721, NFTParams.token_id, {"from": A.bidder, "value": NFTParams.price}
+        [setup.e721], [NFTParams.token_id], {"from": A.bidder, "value": NFTParams.price}
     )
 
     assert setup.e721.ownerOf(NFTParams.token_id) == A.bidder
@@ -134,7 +134,9 @@ def test_accept_ask_1155(setup, A):
     )
     setup.e1155.setApprovalForAll(setup.marketplace, True, {"from": A.asker})
     setup.marketplace.acceptAsk(
-        setup.e1155, NFTParams.token_id, {"from": A.bidder, "value": NFTParams.price}
+        [setup.e1155],
+        [NFTParams.token_id],
+        {"from": A.bidder, "value": NFTParams.price},
     )
 
     assert setup.e1155.balanceOf(A.asker, NFTParams.token_id) == 9

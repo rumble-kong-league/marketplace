@@ -77,9 +77,12 @@ interface IMarketplace {
      * there is no bid that requires escrow adjusting. See acceptBid's function
      * body comments for details.
      */
-    function acceptAsk(INFTContract nft, uint256 tokenID) external payable;
+    function acceptAsk(INFTContract[] calldata nft, uint256[] calldata tokenID)
+        external
+        payable;
 
-    function acceptBid(INFTContract nft, uint256 tokenID) external;
+    function acceptBid(INFTContract[] calldata nft, uint256[] calldata tokenID)
+        external;
 
     /**
      * @dev Sellers will be able to withdraw their payment by calling this function.

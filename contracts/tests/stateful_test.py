@@ -72,15 +72,12 @@ class StateMachine:
             token_id_e7 = self.pluck_token_id(e.events)
             token_id_e1 = self.pluck_token_id(ee.events)
 
-            self.holdership[Account(asker)].add(
-                NFT(Account(self.e7.address), token_id_e7)
-            )
-            self.holdership[Account(asker)].add(
-                NFT(Account(self.e1.address), token_id_e1)
-            )
+            _asker = Account(asker)
+            self.holdership[_asker].add(NFT(Account(self.e7.address), token_id_e7))
+            self.holdership[_asker].add(NFT(Account(self.e1.address), token_id_e1))
 
     def invariant(self):
-        # invariants gets ran after each rule
+        # invariants run after each rule
         contract_bids = self.contract_bids()
         contract_asks = self.contract_asks()
 
@@ -90,7 +87,7 @@ class StateMachine:
         assert state_bids == contract_bids
         assert state_asks == contract_asks
 
-        pr_purple("invariant")
+        pr_purple("invariant checked")
 
     def rule_ask(self, price="st_price"):
         asker, nft = self.find_asker()
@@ -103,10 +100,11 @@ class StateMachine:
             [ask.to],
             {"from": ask.seller},
         )
-        self.update_asks(ask)
+        self.add_ask(ask)
 
         pr_yellow(f"{ask}")
 
+    # todo: when precondition works with brownie, remove the if condition
     # @precondition(lambda _: True == True)
     def rule_cancel_ask(self, st_price):
         if self.get_ask() is None:
@@ -140,7 +138,7 @@ class StateMachine:
 
         if existing_bid is None:
             self.marketplace.bid(*bid_args)
-            self.update_bids(bid)
+            self.add_bid(bid)
             pr_light_purple(f"{bid}")
         else:
             if existing_bid.price > bid.price:
@@ -176,6 +174,7 @@ class StateMachine:
 
     # ---
 
+    # returns an asker and an NFT that they can place an ask on
     def find_asker(self) -> Tuple[Account, NFT]:
         """
         Loops through holdership, to give the first available account that can place an ask
@@ -189,8 +188,9 @@ class StateMachine:
             if len(nfts) > 0:
                 return (holder, next(iter(nfts)))
 
-        return Account(ZERO_ADDRESS), NFT(ZERO_ADDRESS, 0)
+        return Account(ZERO_ADDRESS), NFT(Account(ZERO_ADDRESS), 0)
 
+    # returns bidder and an NFT on which to bid
     def find_bidder(self) -> Tuple[Account, NFT]:
         """
         Finds the account from which we can bid, and also find an NFT on which to bid
@@ -209,6 +209,7 @@ class StateMachine:
 
         return (bidder, NFT(Account(nft_contract.address), token_id))
 
+    # given an NFT, gives you a bid on it (or None)
     def find_existing_bid(self, nft: NFT) -> Optional[Bid]:
         """
         Finds a bid, given an NFT.
@@ -216,6 +217,7 @@ class StateMachine:
         bid = [bid for bids in self.bids.values() for bid in bids if nft == bid.nft]
         return None if len(bid) == 0 else bid[0]
 
+    # returns an account that is not the arg account
     def not_this_account(self, not_this: Account) -> Account:
         for acc in self.accounts.bidders + self.accounts.askers:
             if acc.address != not_this.address:
@@ -255,13 +257,17 @@ class StateMachine:
                 self.bids[order.buyer].remove(existing_order)
             self.bids[order.buyer].add(order)
 
-    def update_asks(self, ask: Ask) -> None:
+    # adds ask to the test's state
+    def add_ask(self, ask: Ask) -> None:
         self._update_order(ask)
 
-    def update_bids(self, bid: Bid) -> None:
+    # adds bid to the test's state
+    def add_bid(self, bid: Bid) -> None:
         self._update_order(bid)
 
     def _remove_order(self, order: Union[Ask, Bid]) -> None:
+        # breakpoint()
+
         agents_orders = set()
         is_ask_request = isinstance(order, Ask)
 
@@ -269,23 +275,18 @@ class StateMachine:
             self.asks[order.seller] if is_ask_request else self.bids[order.buyer]
         )
 
-        updated_orders = set(
-            _order
-            for _order in agents_orders
-            if (
-                _order.nft.token_id != order.nft.token_id
-                and _order.nft.address != order.nft.address
-            )
-        )
+        updated_orders = set(_order for _order in agents_orders if _order != order)
 
         if is_ask_request:
             self.asks[order.seller] = updated_orders
         else:
             self.bids[order.buyer] = updated_orders
 
+    # removes ask from the test's state
     def remove_ask(self, ask: Ask) -> None:
         self._remove_order(ask)
 
+    # removes bid from the test's state
     def remove_bid(self, bid: Bid) -> None:
         self._remove_order(bid)
 
@@ -304,7 +305,7 @@ class StateMachine:
                 _order = contract_func(nft.address, token_id)
                 order: Union[Ask, Bid]
                 if _order[0]:
-                    nft = NFT(nft.address, token_id)
+                    nft = NFT(Account(nft.address), token_id)
                     if is_ask_request:
                         order = Ask(
                             True,
@@ -326,7 +327,7 @@ class StateMachine:
     def contract_bids(self) -> Set[Union[Ask, Bid]]:
         return self._contract_orders(is_ask_request=False)
 
-    def flatten_dict(self, d: Dict[K, List[V]]) -> Set[V]:
+    def flatten_dict(self, d: Dict[K, Set[V]]) -> Set[V]:
         """
         Double set comprehension allows us to flatten a dict whose values are lists of
         values.
@@ -348,9 +349,11 @@ class StateMachine:
 
         return None
 
+    # returns first bid that it finds (or None)
     def get_bid(self) -> Optional[Bid]:
         return self._get_first_order(is_ask_request=False)  # type: ignore
 
+    # returns first ask that it finds (or None)
     def get_ask(self) -> Optional[Ask]:
         return self._get_first_order(is_ask_request=True)  # type: ignore
 

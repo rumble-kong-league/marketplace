@@ -48,7 +48,7 @@ library NFTCommon {
         INFTContract nft,
         address potentialOwner,
         uint256 tokenID
-    ) internal returns (uint256) {
+    ) internal view returns (uint256) {
         try nft.ownerOf(tokenID) returns (address owner) {
             if (owner == potentialOwner) {
                 return 1;
