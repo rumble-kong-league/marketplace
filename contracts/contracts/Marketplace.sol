@@ -52,7 +52,7 @@ contract Marketplace is IMarketplace {
 
     constructor(address payable newBeneficiary) {
         require(newBeneficiary != payable(address(0)), "");
-        beneficiary = newBenegiciary;
+        beneficiary = newBeneficiary;
         admin = msg.sender;
     }
 
@@ -82,6 +82,8 @@ contract Marketplace is IMarketplace {
                 nft[i].quantityOf(msg.sender, tokenID[i]) > 0,
                 REVERT_NOT_OWNER_OF_TOKEN_ID
             );
+            // if feecollector extension applied, this ensures math is correct
+            require(price[i] > 10_000, "");
 
             // overwristes or creates a new one
             asks[address(nft[i])][tokenID[i]] = Ask({
@@ -219,7 +221,6 @@ contract Marketplace is IMarketplace {
         override
     {
         uint256 totalPrice = 0;
-
         for (uint256 i = 0; i < nft.length; i++) {
             address nftAddress = address(nft[i]);
 
@@ -247,9 +248,9 @@ contract Marketplace is IMarketplace {
 
             totalPrice += asks[nftAddress][tokenID[i]].price;
 
-            escrow[asks[nftAddress][tokenID[i]].seller] += asks[nftAddress][
-                tokenID[i]
-            ].price;
+            escrow[asks[nftAddress][tokenID[i]].seller] += _takeFee(
+                asks[nftAddress][tokenID[i]].price
+            );
 
             // if there is a bid for this tokenID from msg.sender, cancel and refund
             if (bids[nftAddress][tokenID[i]].buyer == msg.sender) {
@@ -292,6 +293,7 @@ contract Marketplace is IMarketplace {
         external
         override
     {
+        uint256 escrowDelta = 0;
         for (uint256 i = 0; i < nft.length; i++) {
             require(
                 nft[i].quantityOf(msg.sender, tokenID[i]) > 0,
@@ -300,7 +302,8 @@ contract Marketplace is IMarketplace {
 
             address nftAddress = address(nft[i]);
 
-            escrow[msg.sender] += bids[nftAddress][tokenID[i]].price;
+            escrowDelta += bids[nftAddress][tokenID[i]].price;
+            // escrow[msg.sender] += bids[nftAddress][tokenID[i]].price;
 
             emit BidAccepted({
                 nft: nftAddress,
@@ -319,6 +322,9 @@ contract Marketplace is IMarketplace {
             delete asks[nftAddress][tokenID[i]];
             delete bids[nftAddress][tokenID[i]];
         }
+
+        uint256 remaining = _takeFee(escrowDelta);
+        escrow[msg.sender] = remaining;
     }
 
     /**
@@ -353,12 +359,15 @@ contract Marketplace is IMarketplace {
     // ============ EXTENSIONS =============================================
 
     /**
-     * @dev Hook that is called before any token transfer.
+     * @dev Hook that is called to collect the fees in FeeCollector extension.
+     * Plain implementation of marketplace (without the FeeCollector extension)
+     * has no fees.
+     *
+     * @param totalPrice Total price payable for the trade(s).
      */
-    function _beforeTokenTransferTakeFee(address from, uint256 totalPrice)
-        internal
-        virtual
-    {}
+    function _takeFee(uint256 totalPrice) internal virtual returns (uint256) {
+        return totalPrice;
+    }
 }
 
 /*
