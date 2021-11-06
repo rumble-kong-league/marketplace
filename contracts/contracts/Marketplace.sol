@@ -7,8 +7,6 @@ import "../interfaces/IMarketplace.sol";
 import "../interfaces/INFTContract.sol";
 import "./NFTCommon.sol";
 
-// todo: batch operations
-// todo: transfers will not work like in here
 // todo: think about how on transfer we can delete the ask of prev owner
 // might not be necessary if we bake in checks, and if checks fail: delete
 // todo: check out 0.8.9 custom types
@@ -20,7 +18,12 @@ contract Marketplace is IMarketplace {
     mapping(address => mapping(uint256 => Bid)) public bids;
     mapping(address => uint256) public escrow;
 
-    // ================
+    // =====================================================================
+
+    address payable beneficiary;
+    address admin;
+
+    // =====================================================================
 
     string public constant REVERT_NOT_OWNER_OF_TOKEN_ID =
         "Marketplace::not an owner of token ID";
@@ -45,16 +48,29 @@ contract Marketplace is IMarketplace {
     string public constant REVERT_INSUFFICIENT_ETHER =
         "Marketplace::insufficient ether sent";
 
-    // ======= CREATE ASK OR BID =====================================
+    // =====================================================================
 
-    // creating ask requires you to have at least one amount of the NFT
-    // 1. checking that the owner of the 721 NFT tokenID is not a msg.sender is redundant,
-    // since there is a check that the owner is the msg.sender.
-    // 2. what is the worst that can happen if the owner of the 1155 NFT is zero address?
-    // that it calls this function. Which is not possible. If it did call this function,
-    // it would be able to create asks that other agents could interact with. Which in itself,
-    // isn't a bad scenario.
+    constructor(address payable newBeneficiary) {
+        require(newBeneficiary != payable(address(0)), "");
+        beneficiary = newBenegiciary;
+        admin = msg.sender;
+    }
 
+    // ======= CREATE ASK / BID ============================================
+
+    /**
+     * @notice Creates an ask for (`nft`, `tokenID`) tuple for `price`, which can
+     * be reserved for `to`, if `to` is not a zero address.
+     *
+     * @dev Creating an ask requires msg.sender to have at least one qty of
+     * (`nft`, `tokenID`).
+     *
+     * @param nft     An array of ERC-721 and / or ERC-1155 addresses.
+     * @param tokenID Token Ids of the NFTs msg.sender wishes to sell.
+     * @param price   Prices at which the seller is willing to sell the NFTs.
+     * @param to      Addresses for which the sale is reserved. If zero address,
+     *                then anyone can accept.
+     */
     function ask(
         INFTContract[] calldata nft,
         uint256[] calldata tokenID,
@@ -84,17 +100,13 @@ contract Marketplace is IMarketplace {
         }
     }
 
-    // what happens if you do bid on an NFT that is in zero address
-    // what is the worst that can happen?
-    //   two modes of interacting with an existing bid: cancel bid or accept bid
-    // - you can cancel the bid any time, so you will get your money back
-    // - outside of your control: someone accepts the bid (if 1155, and 1 unit in zero address, but someone else
-    //     also has some qty of the NFT in their wallet). This will be a normal flow of accepting a bid.
-    //     Therefore, when someone bids on a single unit of 1155, they are bidding on all the 1155s
-    //     If someone is bidding on a certain qty of 1155, they are bidding on all the holders of the 1155
-    //        that hold that qty of 1155 or more.
-    // Therefore, it is not a problem if zero address has some quantity of 1155
-
+    /**
+     * @notice Creates a bid on (`nft`, `tokenID`) tuple for `price`.
+     *
+     * @param nft     An array of ERC-721 and / or ERC-1155 addresses.
+     * @param tokenID Token Ids of the NFTs msg.sender wishes to buy.
+     * @param price   Prices at which the buyer is willing to buy the NFTs.
+     */
     function bid(
         INFTContract[] calldata nft,
         uint256[] calldata tokenID,
@@ -138,8 +150,15 @@ contract Marketplace is IMarketplace {
         require(totalPrice == msg.value, REVERT_INSUFFICIENT_ETHER);
     }
 
-    // ======= CANCEL ASK OR BID =====================================
+    // ======= CANCEL ASK / BID ============================================
 
+    /**
+     * @notice Cancels ask(s) that the seller previously created.
+     *
+     * @param nft     An array of ERC-721 and / or ERC-1155 addresses.
+     * @param tokenID Token Ids of the NFTs msg.sender wishes to cancel the
+     *                asks on.
+     */
     function cancelAsk(INFTContract[] calldata nft, uint256[] calldata tokenID)
         external
         override
@@ -157,6 +176,13 @@ contract Marketplace is IMarketplace {
         }
     }
 
+    /**
+     * @notice Cancels bid(s) that the msg.sender previously created.
+     *
+     * @param nft     An array of ERC-721 and / or ERC-1155 addresses.
+     * @param tokenID Token Ids of the NFTs msg.sender wishes to cancel the
+     *                bids on.
+     */
     function cancelBid(INFTContract[] calldata nft, uint256[] calldata tokenID)
         external
         override
@@ -176,15 +202,16 @@ contract Marketplace is IMarketplace {
         }
     }
 
-    // ======= ACCEPT ASK OR BID =====================================
+    // ======= ACCEPT ASK / BID ===========================================
 
     /**
-     * @dev Seller placed ask, you are fine with the terms. You accept their
-     * ask by sending the required msg.value and indicating the id of the token
-     * you are purchasing. There is no outflow like in the acceptBid case, since
-     * there is no bid that requires escrow adjusting. See acceptBid's function
-     * body comments for details. There is no batching, since the seller is
-     * not required to be the same address across all the accepted asks.
+     * @notice Seller placed ask(s), you (buyer) are fine with the terms. You accept
+     * their ask by sending the required msg.value and indicating the id of the
+     * token(s) you are purchasing.
+     *
+     * @param nft     An array of ERC-721 and / or ERC-1155 addresses.
+     * @param tokenID Token Ids of the NFTs msg.sender wishes to accept the
+     *                asks on.
      */
     function acceptAsk(INFTContract[] calldata nft, uint256[] calldata tokenID)
         external
@@ -254,9 +281,12 @@ contract Marketplace is IMarketplace {
     }
 
     /**
-     * @dev You are the owner of the NFTs, someone submitted the bids on them.
-     * You accept one or more of these bids. Batching here does not work because
-     * you are sending the NFTs to potentially different addresses.
+     * @notice You are the owner of the NFTs, someone submitted the bids on them.
+     * You accept one or more of these bids.
+     *
+     * @param nft     An array of ERC-721 and / or ERC-1155 addresses.
+     * @param tokenID Token Ids of the NFTs msg.sender wishes to accept the
+     *                bids on.
      */
     function acceptBid(INFTContract[] calldata nft, uint256[] calldata tokenID)
         external
@@ -291,13 +321,44 @@ contract Marketplace is IMarketplace {
         }
     }
 
+    /**
+     * @notice Sellers can receive their payment by calling this function.
+     */
     function withdraw() external override {
         uint256 amount = escrow[msg.sender];
         escrow[msg.sender] = 0;
         payable(address(msg.sender)).sendValue(amount);
     }
 
-    // ==============================================================
+    // ============ ADMIN ==================================================
+
+    /**
+     * @dev Used to change the address of the trade fee receiver.
+     */
+    function changeBeneficiary(address payable newBeneficiary) external {
+        require(msg.sender == admin, "");
+        require(newBeneficiary != payable(address(0)), "");
+        beneficiary = newBeneficiary;
+    }
+
+    /**
+     * @dev sets the admin to the zero address. This implies that beneficiary
+     * address and other admin only functions are disabled.
+     */
+    function revokeAdmin() external {
+        require(msg.sender == admin, "");
+        admin = address(0);
+    }
+
+    // ============ EXTENSIONS =============================================
+
+    /**
+     * @dev Hook that is called before any token transfer.
+     */
+    function _beforeTokenTransferTakeFee(address from, uint256 totalPrice)
+        internal
+        virtual
+    {}
 }
 
 /*
