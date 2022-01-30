@@ -51,7 +51,6 @@ contract Marketplace is IMarketplace {
     // =====================================================================
 
     constructor(address payable newBeneficiary) {
-        require(newBeneficiary != payable(address(0)), "");
         beneficiary = newBeneficiary;
         admin = msg.sender;
     }
@@ -83,7 +82,7 @@ contract Marketplace is IMarketplace {
                 REVERT_NOT_OWNER_OF_TOKEN_ID
             );
             // if feecollector extension applied, this ensures math is correct
-            require(price[i] > 10_000, "");
+            require(price[i] > 10_000, "price too low");
 
             // overwristes or creates a new one
             asks[address(nft[i])][tokenID[i]] = Ask({
@@ -351,10 +350,10 @@ contract Marketplace is IMarketplace {
      * @dev sets the admin to the zero address. This implies that beneficiary
      * address and other admin only functions are disabled.
      */
-    function revokeAdmin() external {
-        require(msg.sender == admin, "");
-        admin = address(0);
-    }
+    // function revokeAdmin() external {
+    //     require(msg.sender == admin, "");
+    //     admin = address(0);
+    // }
 
     // ============ EXTENSIONS =============================================
 

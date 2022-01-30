@@ -42,8 +42,8 @@ TokenID = WithdrawableBalance = int
 
 class StateMachine:
 
-    # price needs to at least be 1
-    st_price = strategy("uint256", min_value="1", max_value="1 ether")
+    # price needs to at least be 10_000
+    st_price = strategy("uint256", min_value="10001", max_value="1 ether")
 
     def __init__(cls, A, marketplace, e7, e1):
         cls.accounts = A
@@ -359,7 +359,7 @@ class StateMachine:
 
 
 def test_stateful(state_machine, A):
-    marketplace = Marketplace.deploy({"from": A.admin})
+    marketplace = Marketplace.deploy(A.admin, {"from": A.admin})
 
     e7 = E721.deploy({"from": A.admin})
     e1 = E1155.deploy({"from": A.admin})

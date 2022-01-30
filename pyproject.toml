@@ -1,8 +1,8 @@
 [tool.poetry]
 name        = "marketplace"
-version     = "0.1.0"
-description = ""
-authors     = ["nazariyv <nazariy@inbox.ru>"]
+version     = "0.1.1"
+description = "ERC721 and ERC1155 smart contract marketplace"
+authors     = ["Rumble League Studios <hello@rl.games>"]
 license     = "MIT"
 
 [tool.poetry.dependencies]

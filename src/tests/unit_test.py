@@ -50,7 +50,7 @@ def A():
 
 @pytest.fixture(scope="module")
 def setup(A, Marketplace, E721, E1155):
-    marketplace = Marketplace.deploy({"from": A.admin})
+    marketplace = Marketplace.deploy(A.admin, {"from": A.admin})
 
     e721 = E721.deploy({"from": A.admin})
     e1155 = E1155.deploy({"from": A.admin})
