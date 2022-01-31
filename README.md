@@ -15,6 +15,8 @@ You can use poetry for easy python virtual environment and requirements handling
 
 ## Dev
 
+You will need to initialise poetry with the root config.
+
 To run tests
 
 `brownie test -s`

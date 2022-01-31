@@ -6,13 +6,13 @@ authors     = ["Rumble League Studios <hello@rl.games>"]
 license     = "MIT"
 
 [tool.poetry.dependencies]
-python      = ">=3.9,<3.10"
+python      = ">=3.7.2,<3.10"
 
 [tool.poetry.dev-dependencies]
-black       = "^21.9b0"
-eth-brownie = "^1.17.0"
-pytest = "^6.2.5"
-mypy = "^0.910"
+black       = "21.11b1"
+eth-brownie = "1.17.2"
+pytest = "6.2.5"
+mypy = "0.931"
 
 [build-system]
 requires      = ["poetry-core>=1.0.0"]
