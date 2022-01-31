@@ -64,7 +64,7 @@ def test_accept_bid_721(setup, A):
     assert setup.e721.ownerOf(NFTParams.token_id) == A.asker
     assert setup.marketplace.escrow(A.asker) == 0
 
-    setup.marketplace.bid(
+    setup.marketplace.createBid(
         [setup.e721],
         [NFTParams.token_id],
         [NFTParams.price],
@@ -83,7 +83,7 @@ def test_accept_bid_1155(setup, A):
     assert setup.e1155.balanceOf(A.asker, NFTParams.token_id) == 10
     assert setup.marketplace.escrow(A.asker) == 0
 
-    setup.marketplace.bid(
+    setup.marketplace.createBid(
         [setup.e1155],
         [NFTParams.token_id],
         [NFTParams.price],
@@ -103,7 +103,7 @@ def test_accept_ask_721(setup, A):
     assert setup.e721.ownerOf(NFTParams.token_id) == A.asker
     assert setup.marketplace.escrow(A.asker) == 0
 
-    setup.marketplace.ask(
+    setup.marketplace.createAsk(
         [setup.e721],
         [NFTParams.token_id],
         [NFTParams.price],
@@ -125,7 +125,7 @@ def test_accept_ask_1155(setup, A):
     assert setup.e1155.balanceOf(A.asker, NFTParams.token_id) == NFTParams.qty_1155
     assert setup.marketplace.escrow(A.asker) == 0
 
-    setup.marketplace.ask(
+    setup.marketplace.createAsk(
         [setup.e1155],
         [NFTParams.token_id],
         [NFTParams.price],

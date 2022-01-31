@@ -1,38 +1,35 @@
 //SPDX-License-Identifier: MIT
-pragma solidity =0.8.9;
+pragma solidity =0.8.11;
 
 import "./INFTContract.sol";
 
 interface IMarketplace {
-    // ======================= EVENTS ================================
 
-    event AskCreated(
+    event CreateAsk(
         address indexed nft,
         uint256 indexed tokenID,
         uint256 price,
         address indexed to
     );
-    event AskDeleted(address indexed nft, uint256 indexed tokenID);
-    event AskAccepted(
+    event CancelAsk(address indexed nft, uint256 indexed tokenID);
+    event AcceptAsk(
         address indexed nft,
         uint256 indexed tokenID,
         uint256 price,
         address indexed to
     );
 
-    event BidCreated(
+    event CreateBid(
         address indexed nft,
         uint256 indexed tokenID,
         uint256 price
     );
-    event BidDeleted(address indexed nft, uint256 indexed tokenID);
-    event BidAccepted(
+    event CancelBid(address indexed nft, uint256 indexed tokenID);
+    event AcceptBid(
         address indexed nft,
         uint256 indexed tokenID,
         uint256 price
     );
-
-    // ========================= STRUCTS ==============================
 
     struct Ask {
         bool exists;
@@ -47,22 +44,18 @@ interface IMarketplace {
         uint256 price;
     }
 
-    // ===============================================================
-
-    function ask(
+    function createAsk(
         INFTContract[] calldata nft,
         uint256[] calldata tokenID,
         uint256[] calldata price,
         address[] calldata to
     ) external;
 
-    function bid(
+    function createBid(
         INFTContract[] calldata nft,
         uint256[] calldata tokenID,
         uint256[] calldata price
     ) external payable;
-
-    // ======= CANCEL ASK OR BID =====================================
 
     function cancelAsk(INFTContract[] calldata nft, uint256[] calldata tokenID)
         external;
@@ -70,13 +63,6 @@ interface IMarketplace {
     function cancelBid(INFTContract[] calldata nft, uint256[] calldata tokenID)
         external;
 
-    /**
-     * @dev Seller placed ask, you are fine with the terms. You accept their
-     * ask by sending the required msg.value and indicating the id of the token
-     * you are purchasing. There is no outflow like in the acceptBid case, since
-     * there is no bid that requires escrow adjusting. See acceptBid's function
-     * body comments for details.
-     */
     function acceptAsk(INFTContract[] calldata nft, uint256[] calldata tokenID)
         external
         payable;
@@ -84,10 +70,6 @@ interface IMarketplace {
     function acceptBid(INFTContract[] calldata nft, uint256[] calldata tokenID)
         external;
 
-    /**
-     * @dev Sellers will be able to withdraw their payment by calling this function.
-     * Unsuccessful bidders will be able to withdraw their bid calling this function.
-     */
     function withdraw() external;
 }
 

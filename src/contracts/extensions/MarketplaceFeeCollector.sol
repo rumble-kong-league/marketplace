@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity =0.8.9;
+pragma solidity =0.8.11;
 
 import "@openzeppelin/contracts/utils/Address.sol";
 import "../Marketplace.sol";
@@ -14,9 +14,7 @@ abstract contract MarketplaceFeeCollector is Marketplace {
     uint256 public fee = 500;
     uint256 public constant HUNDRED_PERCENT = 10_000;
 
-    /**
-     * @dev Hook that is called before any token transfer.
-     */
+    /// @dev Hook that is called before any token transfer.
     function _beforeTokenTransferTakeFee(uint256 totalPrice)
         internal
         returns (uint256)

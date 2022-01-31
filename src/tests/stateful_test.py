@@ -93,7 +93,7 @@ class StateMachine:
         asker, nft = self.find_asker()
 
         ask = Ask(True, nft, asker, price, Account(TO_ANYONE))
-        self.marketplace.ask(
+        self.marketplace.createAsk(
             [ask.nft.address],
             [ask.nft.token_id],
             [ask.price],
@@ -137,13 +137,13 @@ class StateMachine:
         ]
 
         if existing_bid is None:
-            self.marketplace.bid(*bid_args)
+            self.marketplace.createBid(*bid_args)
             self.add_bid(bid)
             pr_light_purple(f"{bid}")
         else:
             if existing_bid.price > bid.price:
                 with reverts(self.marketplace.REVERT_BID_TOO_LOW()):
-                    self.marketplace.bid(*bid_args)
+                    self.marketplace.createBid(*bid_args)
 
     # @precondition(lambda _: True == True)
     def rule_cancel_bid(self, st_price):
